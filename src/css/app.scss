@@ -1,1 +1,5 @@
-// app global css
+// Global stylesheet entry — Quasar's config loads this file; it pulls the
+// others in via @use (which also emits their CSS output).
+@use './tokens';
+@use './base';
+@use './quasar-overrides';

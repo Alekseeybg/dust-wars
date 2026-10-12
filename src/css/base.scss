@@ -1,0 +1,38 @@
+html {
+  font-size: var(--fs-base);
+}
+
+body {
+  font-family: var(--sans);
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  color: var(--text);
+
+  background-color: var(--bg-0);
+  background-image:
+    radial-gradient(1300px 800px at 12% -10%, #1a1208 0%, transparent 60%),
+    radial-gradient(1000px 700px at 100% 110%, #140804 0%, transparent 55%),
+    linear-gradient(180deg, #050505, #0c0a09);
+  background-attachment: fixed;
+}
+
+// Film grain overlay — fixed, non-interactive.
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.055;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.mono {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.muted {
+  color: var(--muted);
+}

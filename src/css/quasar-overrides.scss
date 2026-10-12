@@ -1,0 +1,14 @@
+// Strip Quasar's Material Design personality — we want the shell to feel
+// like a bespoke, dim interface, not a web-app kit.
+.q-header {
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.q-page-container {
+  background: transparent !important;
+}
+
+.q-layout {
+  background: transparent !important;
+}
