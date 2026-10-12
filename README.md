@@ -129,6 +129,4 @@ text is 15px. These are set as tokens and should not be shrunk.
 
 ## Status
 
-Early development. Working: shell layout, topbar, sidebar, routing.
-Next: market screen with live per-city pricing, buy/sell actions,
-and the day/travel loop.
+Early development.

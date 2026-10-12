@@ -82,5 +82,33 @@ export default defineConfigWithVueTs(
     },
   },
 
+  {
+    files: ['src/domain/**/*.ts', 'src/data/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                'stores',
+                'stores/*',
+                'components',
+                'components/*',
+                'pages',
+                'pages/*',
+                'layouts',
+                'layouts/*',
+              ],
+              message:
+                'domain/ and data/ must not import from UI layers. ' +
+                'Dependencies flow UI → domain → data.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   prettierSkipFormatting,
 );
