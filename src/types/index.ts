@@ -79,6 +79,7 @@ export interface CargoGroup {
 // -----------------------------------------------------------------------------
 
 export type LogKind = 'info' | 'good' | 'bad';
+export type LogCategory = 'trade' | 'event';
 
 export type LogColor =
   | 'gold'
@@ -101,6 +102,8 @@ export interface LogSegment {
 export interface LogEntry {
   day: number;
   kind: LogKind;
+  /** Optional for compatibility with existing saved games. */
+  category?: LogCategory;
   segments: LogSegment[];
 }
 

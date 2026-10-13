@@ -14,6 +14,7 @@ Consult these rules at the start of every task and review the relevant rules bef
 - Use dark, neutral charcoal surfaces with subtle gradients and inset depth. Keep amber/gold for accents; avoid brown surfaces and blue color casts.
 - Reuse established typography, spacing, rounded edges, borders, hover effects, focus states, and popup treatments. Prefer existing components and styles when adding or changing UI.
 - Keep controls compact and content readable. Buy/Sell actions belong beside their quantity controls; popup pointers must match their popup and align with their trigger.
+- Treat log entries as static reading content with generous row spacing, subtle charcoal backgrounds, and a single separator between entries. Avoid clickable-card styling, repeating notebook rules, and entry hover effects. Preserve the approved log headers, filters, and scrollbars when changing entry presentation.
 - Preserve the existing generated logo. Follow the approved centered Market title with its location subtitle when maintaining the market header.
 - For material departures from the approved visual direction, prepare a concrete proposal or mockup for review unless the user has already authorized that departure.
 

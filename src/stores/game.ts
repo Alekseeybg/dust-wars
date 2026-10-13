@@ -1,5 +1,13 @@
 import { defineStore } from 'pinia';
-import type { GameState, DrugId, LogKind, LogSegment, TradeResult, TradeDirection } from 'types';
+import type {
+  GameState,
+  DrugId,
+  LogCategory,
+  LogKind,
+  LogSegment,
+  TradeResult,
+  TradeDirection,
+} from 'types';
 import { getCity } from 'data/cities';
 import { calculateMarket, epochCrossed, isSupplyResetDay, emptySupply } from 'domain/pricing';
 import { heldQty, totalHeld, groupCargo } from 'domain/cargo';
@@ -42,9 +50,9 @@ export const useGameStore = defineStore('game', {
       saveGame(this.$state);
     },
 
-    addLog(kind: LogKind, segments: LogSegment[] | string) {
+    addLog(kind: LogKind, segments: LogSegment[] | string, category: LogCategory = 'event') {
       const segs = typeof segments === 'string' ? [logSegment(segments)] : segments;
-      this.log.push({ day: this.day, kind, segments: segs });
+      this.log.push({ day: this.day, kind, category, segments: segs });
     },
 
     // ---------------------------------------------------------- market --
@@ -73,7 +81,7 @@ export const useGameStore = defineStore('game', {
         state.cargoLots = plan.update.cargoLots;
         state.supply = plan.update.supply;
       });
-      this.addLog(plan.log.kind, plan.log.segments);
+      this.addLog(plan.log.kind, plan.log.segments, 'trade');
       this.refreshMarket();
       this.persist();
       return { ok: true };

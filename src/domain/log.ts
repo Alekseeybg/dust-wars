@@ -1,10 +1,17 @@
-import type { LogSegment, MarketPrices } from 'types';
+import type { LogCategory, LogEntry, LogSegment, MarketPrices } from 'types';
 import { DRUGS } from 'data/drugs';
 
 export const logSegment = (text: string, opts: Omit<LogSegment, 'text'> = {}): LogSegment => ({
   text,
   ...opts,
 });
+
+/** Older saves predate explicit categories; only their trade messages need inference. */
+export function logCategory(entry: LogEntry): LogCategory {
+  return (
+    entry.category ?? (/^(Bought|Sold) /.test(entry.segments[0]?.text ?? '') ? 'trade' : 'event')
+  );
+}
 
 export function epochMovementSegments(prev: MarketPrices, next: MarketPrices): LogSegment[] {
   const risers: { name: string; delta: number }[] = [];

@@ -7,6 +7,7 @@ import { DRUGS } from 'data/drugs';
 import { supplyAt, supplyPressure } from 'domain/pricing';
 import type { DrugId, PricePoint } from 'types';
 import Panel from 'components/Panel.vue';
+import SectionHeading from 'components/SectionHeading.vue';
 import StreetLog from 'components/StreetLog.vue';
 import DrugRow from 'components/market/DrugRow.vue';
 import type { MarketRow } from 'components/market/types';
@@ -88,29 +89,28 @@ function trade(direction: 'buy' | 'sell', drugId: DrugId, qty: number) {
   <div class="market-page">
     <Panel class="market-panel" title="Market" :subtitle="city.name">
       <template #header>
-        <div class="market-panel__heading">
-          <h2 class="market-panel__title">Market</h2>
-          <span class="market-panel__location">
-            <svg viewBox="0 0 16 16" aria-hidden="true">
+        <SectionHeading title="Market" :subtitle="city.name">
+          <template #subtitle-icon>
+            <svg class="market-panel__location-icon" viewBox="0 0 16 16" aria-hidden="true">
               <path d="M12.5 6.5c0 3.1-4.5 7-4.5 7s-4.5-3.9-4.5-7a4.5 4.5 0 0 1 9 0Z" />
               <circle cx="8" cy="6.5" r="1.5" />
             </svg>
-            {{ city.name }}
-          </span>
-        </div>
-
-        <button
-          class="market-panel__reset"
-          type="button"
-          aria-label="Reset all quantities"
-          title="Reset all quantities"
-          @click="resetAllQuantities"
-        >
-          <svg viewBox="0 0 16 16" aria-hidden="true">
-            <path d="M13 6.5A5.25 5.25 0 1 0 13.1 10M13 2.75v3.9H9.1" />
-          </svg>
-          <span>Reset qty</span>
-        </button>
+          </template>
+          <template #action>
+            <button
+              class="section-action section-action--responsive"
+              type="button"
+              aria-label="Reset all quantities"
+              title="Reset all quantities"
+              @click="resetAllQuantities"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M13 6.5A5.25 5.25 0 1 0 13.1 10M13 2.75v3.9H9.1" />
+              </svg>
+              <span>Reset qty</span>
+            </button>
+          </template>
+        </SectionHeading>
       </template>
 
       <div v-if="!market" class="empty">Market data unavailable.</div>
@@ -221,54 +221,11 @@ function trade(direction: 'buy' | 'sell', drugId: DrugId, qty: number) {
 }
 
 :deep(.market-panel .panel__head) {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: center;
-  gap: 12px;
-  min-height: 86px;
-  padding: 16px 18px;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.055), transparent 68%),
-    linear-gradient(180deg, #1b1b1d, #121214 60%, #0b0b0d);
+  padding: 0;
   border-bottom-color: rgba(255, 255, 255, 0.1);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
 }
 
-.market-panel__heading {
-  grid-column: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-width: 0;
-  text-align: center;
-}
-
-.market-panel__title {
-  margin: 0;
-  color: #efb34f;
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  line-height: 1.1;
-  text-transform: uppercase;
-  padding-left: 0.16em;
-}
-
-.market-panel__location {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #a6a6ad;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.2;
-}
-
-.market-panel__location svg {
+.market-panel__location-icon {
   width: 13px;
   height: 13px;
   fill: none;
@@ -276,53 +233,6 @@ function trade(direction: 'buy' | 'sell', drugId: DrugId, qty: number) {
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.3;
-}
-
-.market-panel__reset {
-  grid-column: 3;
-  justify-self: end;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 36px;
-  padding: 0 11px;
-  color: #b6b6bc;
-  font-family: var(--sans);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  line-height: 1;
-  text-transform: uppercase;
-  white-space: nowrap;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 70%), #0f0f11;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 7px;
-  cursor: pointer;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.045),
-    0 3px 7px -5px #000;
-  transition:
-    color var(--t-fast),
-    background var(--t-fast),
-    border-color var(--t-fast);
-}
-
-.market-panel__reset svg {
-  width: 14px;
-  height: 14px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.35;
-}
-
-.market-panel__reset:hover,
-.market-panel__reset:focus-visible {
-  color: #efb34f;
-  background: #1b1b1e;
-  border-color: rgba(239, 179, 79, 0.3);
-  outline: none;
 }
 
 .drugs {
@@ -514,22 +424,6 @@ function trade(direction: 'buy' | 'sell', drugId: DrugId, qty: number) {
 }
 
 @media (max-width: 520px) {
-  :deep(.market-panel .panel__head) {
-    gap: 8px;
-    padding-inline: 12px;
-  }
-
-  .market-panel__reset {
-    width: 34px;
-    min-height: 34px;
-    justify-content: center;
-    padding: 0;
-  }
-
-  .market-panel__reset span {
-    display: none;
-  }
-
   .drugs__sort-bar {
     gap: 2px;
     padding-inline: 8px;

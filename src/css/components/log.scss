@@ -1,0 +1,41 @@
+/* Log-specific chrome; cargo dialogs retain their existing presentation. */
+.q-dialog__inner > .dust-dialog--log {
+  width: min(860px, calc(100vw - 32px));
+  max-height: min(720px, calc(100dvh - 48px));
+  color: #e5e1d9;
+  background: #0b0b0d;
+  border-color: rgba(255, 255, 255, 0.13);
+  border-radius: 12px;
+}
+
+.dust-dialog--log .dust-dialog__head {
+  flex: 0 0 auto;
+  padding: 0;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.dust-dialog--log .dust-dialog__body {
+  min-height: 0;
+  max-height: none;
+  padding: 0;
+  gap: 0;
+  overflow-y: auto;
+}
+
+.dust-dialog--log .log-feed__toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.dust-dialog--log .dust-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(160, 160, 171, 0.3);
+}
+
+.dust-dialog--log .dust-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(160, 160, 171, 0.55);
+}
+
+.dust-dialog--log .dust-scroll::-webkit-scrollbar-thumb:active {
+  background-color: rgba(160, 160, 171, 0.75);
+}

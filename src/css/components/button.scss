@@ -138,3 +138,73 @@
   background: rgba(184, 137, 63, 0.08);
   border-color: rgba(184, 137, 63, 0.18);
 }
+
+.section-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 11px;
+  color: #b6b6bc;
+  font: 700 9px var(--sans);
+  letter-spacing: 0.12em;
+  line-height: 1;
+  white-space: nowrap;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 70%), #0f0f11;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 3px 7px -5px #000;
+  cursor: pointer;
+  transition:
+    color var(--t-fast),
+    background var(--t-fast),
+    border-color var(--t-fast);
+}
+
+.section-action svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.35;
+}
+
+.section-action:hover {
+  color: #efb34f;
+  background: #1b1b1e;
+  border-color: rgba(239, 179, 79, 0.3);
+}
+
+.section-action:focus-visible {
+  outline: 2px solid #efb34f;
+  outline-offset: 2px;
+}
+
+.section-action--icon {
+  width: 34px;
+  min-height: 34px;
+  padding: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-action {
+    transition: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .section-action--responsive {
+    width: 34px;
+    min-height: 34px;
+    padding: 0;
+  }
+  .section-action--responsive span {
+    display: none;
+  }
+}
