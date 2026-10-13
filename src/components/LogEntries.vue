@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import type { LogEntry } from 'types';
 import { logCategory } from 'domain/log';
+import DayBadge from './DayBadge.vue';
 defineProps<{ entries: LogEntry[] }>();
 </script>
 
 <template>
   <ol class="entries">
     <li v-for="(entry, i) in entries" :key="`${entry.day}-${i}`" class="entry">
-      <span class="entry__day"
-        ><span>Day</span><strong class="mono">{{ entry.day }}</strong></span
-      >
+      <DayBadge class="entry__day" :day="entry.day" />
       <div class="entry__content">
         <span class="entry__category">{{
           logCategory(entry) === 'trade' ? 'Trade' : 'Event'
@@ -62,28 +61,7 @@ defineProps<{ entries: LogEntry[] }>();
   border-bottom: none;
 }
 .entry__day {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 5px;
-  color: #929299;
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  line-height: 20px;
-  white-space: nowrap;
-  text-transform: uppercase;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 70%), #08080a;
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 6px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
-}
-.entry__day strong {
-  color: #d3d3d9;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0;
+  width: 100%;
 }
 .entry__content {
   position: relative;

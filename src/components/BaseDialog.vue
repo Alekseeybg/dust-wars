@@ -10,7 +10,7 @@ const bodyRef = ref<HTMLElement | null>(null);
 
 function scrollTo(selector: string) {
   bodyRef.value?.querySelector<HTMLElement>(selector)?.scrollIntoView({
-    behavior: 'smooth',
+    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
     block: 'start',
   });
 }
@@ -23,7 +23,7 @@ defineExpose({ scrollTo, scrollToTop });
 <template>
   <QDialog v-model="show" @show="emit('show')">
     <div class="dust-dialog" :class="`dust-dialog--${variant}`" :aria-labelledby="titleId">
-      <header class="dust-dialog__head">
+      <header class="dust-dialog__head" :class="{ 'dust-dialog__head--custom': !!$slots.header }">
         <slot name="header" :title-id="titleId">
           <div class="dust-dialog__titles">
             <h2 :id="titleId" class="dust-dialog__title">{{ title }}</h2>
@@ -39,7 +39,7 @@ defineExpose({ scrollTo, scrollToTop });
           </button>
         </slot>
       </header>
-      <div ref="bodyRef" class="dust-dialog__body dust-scroll"><slot /></div>
+      <div ref="bodyRef" class="dust-dialog__body dust-scroll dust-scroll--neutral"><slot /></div>
     </div>
   </QDialog>
 </template>

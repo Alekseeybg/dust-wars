@@ -71,6 +71,8 @@ export interface CargoGroup {
   name: string;
   swatch: string;
   total: number;
+  /** Purchase cost of the units still held, summed across their lots. */
+  totalCost: number;
   lots: CargoLot[];
 }
 

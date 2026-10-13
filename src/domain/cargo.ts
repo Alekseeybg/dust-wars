@@ -98,6 +98,7 @@ export function groupCargo(lots: CargoLots): CargoGroup[] {
       name: drug.name,
       swatch: drug.swatch,
       total: heldQty(lots, drugId),
+      totalCost: batches.reduce((cost, lot) => cost + lot.qty * lot.price, 0),
       lots: batches,
     });
   }

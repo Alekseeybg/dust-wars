@@ -43,3 +43,13 @@
 .dust-scroll::-webkit-scrollbar-corner {
   background: transparent;
 }
+
+.dust-scroll--neutral::-webkit-scrollbar-thumb {
+  background-color: rgba(160, 160, 171, 0.3);
+}
+.dust-scroll--neutral::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(160, 160, 171, 0.55);
+}
+.dust-scroll--neutral::-webkit-scrollbar-thumb:active {
+  background-color: rgba(160, 160, 171, 0.75);
+}

@@ -3,15 +3,17 @@
  * The __body element receives .dust-scroll for the custom scrollbar.
  */
 
-.dust-dialog {
+.q-dialog__inner > .dust-dialog {
   display: flex;
   flex-direction: column;
   max-width: 94vw;
+  max-height: calc(100dvh - 48px);
+  color: #e5e1d9;
 
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0) 40%), #0a0a0c;
-  border: 1px solid rgba(184, 137, 63, 0.18);
-  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 12px;
   box-shadow:
     0 30px 80px -20px rgba(0, 0, 0, 0.95),
     0 8px 24px -10px rgba(0, 0, 0, 0.7),
@@ -21,20 +23,15 @@
 
 /* ---- size variants --------------------------------------------- */
 
-/* Cargo: sized for 5 groups of 1 lot each; body height fixed at 600. */
-.dust-dialog--cargo {
-  width: 540px;
-  --dust-dialog-body-max: 600px;
+/* Cargo: roomy purchase columns with a bounded, scrollable body. */
+.q-dialog__inner > .dust-dialog--cargo {
+  width: min(640px, calc(100vw - 32px));
+  max-height: min(720px, calc(100dvh - 48px));
 }
 
-/* Log: text column ~858px, sized for 12 entries. */
+/* Allow each dialog variant to set its own responsive width. */
 .q-dialog__inner--minimized > div {
   max-width: none !important;
-}
-
-.dust-dialog--log {
-  width: 860px;
-  --dust-dialog-body-max: 560px;
 }
 
 /* ---- head ------------------------------------------------------- */
@@ -46,6 +43,12 @@
   padding: 18px 22px;
   border-bottom: 1px solid var(--stroke);
   background: rgba(255, 255, 255, 0.012);
+}
+
+.dust-dialog__head--custom {
+  flex: 0 0 auto;
+  padding: 0;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 .dust-dialog__titles {
@@ -100,11 +103,12 @@
 /* ---- body ------------------------------------------------------- */
 
 .dust-dialog__body {
-  padding: 20px 22px;
+  min-height: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-height: var(--dust-dialog-body-max, 400px);
+  gap: 0;
+  overflow-y: auto;
 }
 
 .dust-dialog__empty {

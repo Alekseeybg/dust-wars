@@ -1,19 +1,18 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useGameStore } from 'stores/game';
 import type { DrugId } from 'types';
 import Panel from './Panel.vue';
+import SectionHeading from './SectionHeading.vue';
 import CargoDialog from './CargoDialog.vue';
+import CargoCapacity from './cargo/CargoCapacity.vue';
+import CargoLabel from './cargo/CargoLabel.vue';
+import CargoEmpty from './cargo/CargoEmpty.vue';
 
-const game = useGameStore();
-const { cargoGroups: items, cargoUsed: used, capacity } = storeToRefs(game);
-
+const { cargoGroups: items, cargoUsed: used, capacity } = storeToRefs(useGameStore());
 const showDialog = ref(false);
 const dialogFocusId = ref<DrugId | null>(null);
-
-const pct = computed(() => Math.min(100, (used.value / capacity.value) * 100));
-const warn = computed(() => pct.value >= 90);
 
 function openDialog(drugId: DrugId | null = null) {
   if (items.value.length === 0) return;
@@ -23,29 +22,37 @@ function openDialog(drugId: DrugId | null = null) {
 </script>
 
 <template>
-  <Panel title="Cargo Hold">
-    <div class="capacity">
-      <span class="capacity__label">Capacity</span>
-      <span class="capacity__value mono">{{ used }} / {{ capacity }}</span>
-    </div>
+  <Panel class="cargo-hold" title="Cargo Hold">
+    <template #header>
+      <SectionHeading title="Cargo Hold" subtitle="Inventory" />
+    </template>
 
-    <div class="bar" :class="{ 'bar--warn': warn }">
-      <div class="bar__fill" :style="{ width: pct + '%' }" />
-    </div>
+    <CargoCapacity :used="used" :capacity="capacity" />
 
-    <ul v-if="items.length" class="cargo">
-      <li v-for="item in items" :key="item.id" class="cargo__row" @click="openDialog(item.id)">
-        <span class="cargo__name">
-          <span class="cargo__swatch" :style="{ background: item.swatch }" />
-          {{ item.name }}
-        </span>
-        <span class="cargo__qty mono">{{ item.total }}g</span>
+    <ul v-if="items.length" class="cargo dust-scroll dust-scroll--neutral">
+      <li v-for="item in items" :key="item.id">
+        <button
+          class="cargo__row"
+          type="button"
+          :aria-label="`View ${item.name} purchase details, ${item.total} grams`"
+          @click="openDialog(item.id)"
+        >
+          <CargoLabel :name="item.name" :swatch="item.swatch" />
+          <span class="cargo__qty mono">{{ item.total }}<span class="cargo__unit">g</span></span>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" /></svg>
+        </button>
       </li>
     </ul>
-    <p v-else class="empty">Hold is empty.</p>
+    <CargoEmpty v-else />
 
-    <button v-if="items.length > 0" class="view-all" type="button" @click="openDialog(null)">
-      View Details
+    <button
+      v-if="items.length"
+      class="section-action cargo-hold__details"
+      type="button"
+      @click="openDialog()"
+    >
+      View details
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3H3v10h10v-3M9 3h4v4M7 9l6-6" /></svg>
     </button>
 
     <CargoDialog v-model="showDialog" :focus-drug-id="dialogFocusId" />
@@ -53,118 +60,83 @@ function openDialog(drugId: DrugId | null = null) {
 </template>
 
 <style lang="scss" scoped>
-.capacity {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 8px;
+.cargo-hold {
+  background: #0b0b0d;
+  border-color: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
 }
-
-.capacity__label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted-2);
+:deep(.panel__head) {
+  padding: 0;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
 }
-
-.capacity__value {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--text);
+:deep(.panel__body) {
+  padding: 16px;
 }
-
-.bar {
-  height: 5px;
-  border-radius: 3px;
-  background: var(--bg-inset);
-  border: 1px solid var(--stroke);
-  overflow: hidden;
-}
-
-.bar__fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--gold-dim), var(--gold));
-  transition: width var(--t-med);
-}
-
-.bar--warn .bar__fill {
-  background: linear-gradient(90deg, var(--wine), var(--wine-soft));
-}
-
 .cargo {
-  margin-top: var(--sp-4);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  max-height: 282px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
 }
-
 .cargo__row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 4px 6px;
-  margin: 0 -6px;
-  font-size: var(--fs-md);
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background 120ms ease;
-}
-
-.cargo__row:hover {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.cargo__name {
-  display: flex;
-  align-items: center;
   gap: 10px;
-  color: var(--text);
-}
-
-.cargo__swatch {
-  display: inline-block;
-  width: 3px;
-  height: 14px;
-  border-radius: 2px;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
-}
-
-.cargo__qty {
-  color: var(--gold-soft);
-}
-
-.empty {
-  color: var(--muted-2);
-  font-size: var(--fs-sm);
-  margin-top: var(--sp-3);
-}
-
-.view-all {
-  display: block;
   width: 100%;
-  margin-top: var(--sp-4);
-  padding: 8px 12px;
+  min-height: 44px;
+  padding: 9px 11px;
+  text-align: left;
   font-family: var(--sans);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  text-align: center;
-  color: var(--muted);
-  background: transparent;
-  border: 1px solid var(--stroke);
-  border-radius: 5px;
+  background: #131315;
+  border: 0;
+  border-radius: 6px;
   cursor: pointer;
-  transition:
-    color 120ms ease,
-    background 120ms ease,
-    border-color 120ms ease;
+  transition: background var(--t-fast);
 }
-
-.view-all:hover {
-  color: var(--gold-soft);
-  background: rgba(184, 137, 63, 0.06);
-  border-color: rgba(184, 137, 63, 0.28);
+.cargo__row :deep(.cargo-label) {
+  flex: 1;
+}
+.cargo__row:hover {
+  background: #19191c;
+}
+.cargo__row:focus-visible {
+  outline: 2px solid #a6a6ad;
+  outline-offset: -2px;
+}
+.cargo__qty {
+  color: #efb34f;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.cargo__unit {
+  margin-left: 3px;
+  color: #929299;
+  font-size: 10px;
+  font-weight: 400;
+}
+.cargo__row svg {
+  flex: 0 0 12px;
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: #929299;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.3;
+}
+.cargo-hold__details {
+  width: 100%;
+  min-height: 38px;
+  margin-top: 14px;
+  font-size: 10px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cargo__row {
+    transition: none;
+  }
 }
 </style>
