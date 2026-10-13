@@ -14,11 +14,3 @@ export function makeRng(seed: number) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-
-export const randInt = (rng: () => number, min: number, max: number) =>
-  Math.floor(rng() * (max - min + 1)) + min;
-
-export const pick = <T>(rng: () => number, arr: readonly T[]): T =>
-  arr[Math.floor(rng() * arr.length)]!;
-
-export const chance = (rng: () => number, p: number) => rng() < p;

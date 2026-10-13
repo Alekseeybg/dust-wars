@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import TopBar from 'components/TopBar.vue'
-import CargoHold from 'components/CargoHold.vue'
-import ProfileBox from 'components/ProfileBox.vue'
-import ActionsBox from 'components/ActionsBox.vue'
-import DebugPanel from 'components/DebugPanel.vue'
+import TopBar from 'components/TopBar.vue';
+import CargoHold from 'components/CargoHold.vue';
+import ProfileBox from 'components/ProfileBox.vue';
+import ActionsBox from 'components/ActionsBox.vue';
+import DebugPanel from 'components/DebugPanel.vue';
 </script>
 
 <template>

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 defineProps<{
-  title: string
-  subtitle?: string
-  meta?: string
-  metaLabel?: string
-}>()
+  title: string;
+  subtitle?: string;
+  meta?: string;
+  metaLabel?: string;
+}>();
 </script>
 
 <template>
@@ -35,13 +35,12 @@ defineProps<{
 <style lang="scss" scoped>
 .panel {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, .018), rgba(255, 255, 255, 0) 40%),
-    var(--bg-panel);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0) 40%), var(--bg-panel);
   border: 1px solid var(--stroke);
   border-radius: 6px;
   overflow: hidden;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02),
     0 8px 24px -18px #000;
 }
 
@@ -53,7 +52,7 @@ defineProps<{
   min-height: 60px;
   padding: 14px 18px;
   border-bottom: 1px solid var(--stroke);
-  background: rgba(255, 255, 255, .014);
+  background: rgba(255, 255, 255, 0.014);
 }
 
 .panel__title-block {
@@ -67,21 +66,21 @@ defineProps<{
 .panel__title {
   font-size: 14px;
   font-weight: 600;
-  letter-spacing: .26em;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
   color: var(--gold-soft);
   line-height: 1.2;
-  padding-left: .26em;
+  padding-left: 0.26em;
 }
 
 .panel__subtitle {
   font-size: 10px;
   font-weight: 500;
-  letter-spacing: .26em;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
   color: var(--muted);
   line-height: 1;
-  padding-left: .26em;
+  padding-left: 0.26em;
 }
 
 .panel__right {
@@ -105,7 +104,7 @@ defineProps<{
 .panel__stat-label {
   font-size: 10px;
   font-weight: 500;
-  letter-spacing: .18em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--muted-2);
   line-height: 1;

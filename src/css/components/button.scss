@@ -113,3 +113,28 @@
   background: rgba(138, 42, 42, 0.18);
   border-color: rgba(138, 42, 42, 0.58);
 }
+
+.panel-action {
+  padding: 4px 8px;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    color 120ms ease,
+    background 120ms ease,
+    border-color 120ms ease;
+  white-space: nowrap;
+}
+
+.panel-action:hover {
+  color: var(--gold-soft);
+  background: rgba(184, 137, 63, 0.08);
+  border-color: rgba(184, 137, 63, 0.18);
+}

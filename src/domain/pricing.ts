@@ -6,10 +6,21 @@
  * its inputs, which means prices can be reproduced exactly from a
  * save file (seed + epoch + city + drug + supply).
  */
-import type { City, CityId, Drug, DrugId, MarketPrices, PriceTrend, SupplyState } from 'types';
+import type {
+  City,
+  CityId,
+  Drug,
+  DrugId,
+  MarketPrices,
+  PriceTrend,
+  SupplyState,
+  SupplyPressure,
+  TradeDirection,
+} from 'types';
 import { DRUGS } from 'data/drugs';
 import { CONFIG } from 'data/config';
 import { makeRng } from 'utils/rng';
+import { clamp } from 'utils/math';
 
 // -----------------------------------------------------------------------------
 // Epochs
@@ -54,7 +65,7 @@ export function applyTradeImpact(
   cityId: CityId,
   drugId: DrugId,
   qty: number,
-  direction: 'buy' | 'sell',
+  direction: TradeDirection,
 ): SupplyState {
   const citySupply = { ...(supply[cityId] ?? {}) };
   const current = citySupply[drugId] ?? 1.0;
@@ -71,10 +82,7 @@ export function applyTradeImpact(
  * buying here, price up), 'glutted' (player has been selling, price
  * down), or 'neutral'.
  */
-export function supplyPressure(supply: number): {
-  amount: number;
-  kind: 'neutral' | 'scarce' | 'glutted';
-} {
+export function supplyPressure(supply: number): SupplyPressure {
   if (supply > 1.0) {
     const amount = (supply - 1.0) / (CONFIG.SUPPLY_MAX - 1.0);
     return { amount: Math.min(1, amount), kind: 'glutted' };
@@ -120,11 +128,11 @@ function hashSeed(...parts: (string | number)[]): number {
 /**
  * Price of a single drug in a single city for the epoch containing `day`.
  *
- *   price = (base * cityDemand * jitter) / supply
+ *   price = (basePrice * cityDemand * jitter) / supply
  *
  * cityDemand comes from the city's demand map (< 1 = cheap here, good
  * place to buy; > 1 = expensive here, good place to sell). jitter is
- * uniform in [1 - vol, 1 + vol], so a drug with vol = .20 can swing
+ * uniform in [1 - volatility, 1 + volatility], so volatility = .20 can swing
  * ±20% around its mean for that city. supply scales the result: 0.5
  * doubles the price, 2.0 halves it.
  *
@@ -140,8 +148,8 @@ export function calculatePrice(
   const epoch = currentEpoch(day);
   const rng = makeRng(hashSeed(seed, epoch, city.id, drug.id));
   const demand = city.demand[drug.id] ?? 1;
-  const jitter = 1 + (rng() * 2 - 1) * drug.vol;
-  const raw = (drug.base * demand * jitter) / supply;
+  const jitter = 1 + (rng() * 2 - 1) * drug.volatility;
+  const raw = (drug.basePrice * demand * jitter) / supply;
   return Math.max(1, Math.round(raw));
 }
 
@@ -194,12 +202,4 @@ export function priceTrend(
   if (today > yesterday) return 'up';
   if (today < yesterday) return 'down';
   return 'flat';
-}
-
-// -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value));
 }

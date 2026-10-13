@@ -1,33 +1,7 @@
 <script setup lang="ts">
-import Panel from 'components/Panel.vue';
+import PlaceholderPanel from 'components/PlaceholderPanel.vue';
 </script>
 
 <template>
-  <Panel title="Map">
-    <div class="stub">
-      <p class="stub__title">Map screen</p>
-      <p class="stub__sub">Not yet built.</p>
-    </div>
-  </Panel>
+  <PlaceholderPanel title="Map" />
 </template>
-
-<style lang="scss" scoped>
-.stub {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-2);
-  padding: var(--sp-8) var(--sp-5);
-  text-align: center;
-}
-.stub__title {
-  font-size: var(--fs-md);
-  font-weight: 600;
-  color: var(--muted);
-}
-.stub__sub {
-  font-size: var(--fs-sm);
-  color: var(--muted-2);
-  max-width: 42ch;
-}
-</style>

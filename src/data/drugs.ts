@@ -3,21 +3,20 @@ import type { Drug, DrugId } from 'types';
 /**
  * Drug roster.
  *
- * Order matters — it drives display order in the market table. Sorted by
- * base price ascending: cheap/common drugs at the top, rare/expensive at
- * the bottom. The player's progression naturally walks down the list.
+ * Order matters — it drives display order in the market table, with
+ * cheap/common drugs at the top and rare/expensive drugs at the bottom.
  *
  * swatch colours are intentionally muted to sit inside the dim-gold
  * palette; they hint at the drug's real-world appearance without
  * shouting.
  */
-export const DRUGS: Drug[] = [
+export const DRUGS: readonly Drug[] = [
   {
     id: 'weed',
     name: 'Weed',
     tier: 'common',
-    base: 12,
-    vol: 0.2,
+    basePrice: 12,
+    volatility: 0.2,
     swatch: '#3d5a30',
     description: 'Cheap, abundant, low margin. Where every dealer starts.',
   },
@@ -25,8 +24,8 @@ export const DRUGS: Drug[] = [
     id: 'hash',
     name: 'Hash',
     tier: 'common',
-    base: 18,
-    vol: 0.2,
+    basePrice: 18,
+    volatility: 0.2,
     swatch: '#6b4a28',
     description: 'Concentrated cannabis resin. Denser, pricier, easier to move.',
   },
@@ -34,8 +33,8 @@ export const DRUGS: Drug[] = [
     id: 'speed',
     name: 'Speed',
     tier: 'common',
-    base: 15,
-    vol: 0.22,
+    basePrice: 15,
+    volatility: 0.22,
     swatch: '#8a8a80',
     description: 'Amphetamine powder. Cheap stimulant, steady demand.',
   },
@@ -43,8 +42,8 @@ export const DRUGS: Drug[] = [
     id: 'shrooms',
     name: 'Shrooms',
     tier: 'uncommon',
-    base: 22,
-    vol: 0.28,
+    basePrice: 22,
+    volatility: 0.28,
     swatch: '#7a6a4a',
     description: 'Psilocybin mushrooms. Seasonal, unpredictable, occasionally valuable.',
   },
@@ -52,8 +51,8 @@ export const DRUGS: Drug[] = [
     id: 'acid',
     name: 'Acid',
     tier: 'uncommon',
-    base: 28,
-    vol: 0.3,
+    basePrice: 28,
+    volatility: 0.3,
     swatch: '#6a5a90',
     description: 'LSD blotter. Small, potent, high markup per gram.',
   },
@@ -61,8 +60,8 @@ export const DRUGS: Drug[] = [
     id: 'oxy',
     name: 'Oxy',
     tier: 'uncommon',
-    base: 45,
-    vol: 0.32,
+    basePrice: 45,
+    volatility: 0.32,
     swatch: '#5a6a7a',
     description: 'Oxycodone pills. Prescription opioid — steady demand, rising heat.',
   },
@@ -70,8 +69,8 @@ export const DRUGS: Drug[] = [
     id: 'opium',
     name: 'Opium',
     tier: 'rare',
-    base: 60,
-    vol: 0.32,
+    basePrice: 60,
+    volatility: 0.32,
     swatch: '#4a3525',
     description: 'Raw opium. The base of the opioid trade.',
   },
@@ -79,8 +78,8 @@ export const DRUGS: Drug[] = [
     id: 'coke',
     name: 'Coke',
     tier: 'rare',
-    base: 90,
-    vol: 0.35,
+    basePrice: 90,
+    volatility: 0.35,
     swatch: '#b8b0a0',
     description: 'Cocaine. High margin, high risk, always wanted.',
   },
@@ -88,8 +87,8 @@ export const DRUGS: Drug[] = [
     id: 'heroin',
     name: 'Heroin',
     tier: 'rare',
-    base: 120,
-    vol: 0.4,
+    basePrice: 120,
+    volatility: 0.4,
     swatch: '#8a7255',
     description: "Heroin. Heavy money, heavy heat. The loan shark's favourite.",
   },
@@ -97,8 +96,8 @@ export const DRUGS: Drug[] = [
     id: 'fentanyl',
     name: 'Fentanyl',
     tier: 'rare',
-    base: 150,
-    vol: 0.48,
+    basePrice: 150,
+    volatility: 0.48,
     swatch: '#7a3545',
     description: 'Fentanyl. Tiny doses, lethal margins, maximum danger.',
   },

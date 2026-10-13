@@ -1,2 +1,4 @@
-export const money = (n: number) => '$' + Math.round(n).toLocaleString('en-US');
-export const num = (n: number) => Math.round(n).toLocaleString('en-US');
+const numberFormatter = new Intl.NumberFormat('en-US');
+
+export const num = (value: number): string => numberFormatter.format(Math.round(value));
+export const money = (value: number): string => '$' + num(value);

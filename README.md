@@ -1,132 +1,90 @@
 # Dust Wars
 
-A modern single-player remake of the classic turn-based trading game
-(originally _Dope Wars_ / _Drug Wars_, 1984). Buy low in one city, sell
-high in another, and stay one step ahead of the loan shark, the cops,
-and your own bad decisions.
+A browser-based single-player trading game built with Vue 3, Quasar,
+TypeScript and Pinia. Buy and sell on a deterministic, supply-sensitive
+market. Cargo purchases are recorded in batches and sold oldest first (FIFO).
 
-No backend, no accounts, no telemetry. Runs entirely in the browser.
+There is no backend, account system or telemetry. Game state is saved to
+localStorage after trades, day advancement, debug actions and reset. The
+current save key is dust-wars:save and the format version is 3. The page
+loads Inter through Google Fonts; an internet connection is needed for that
+font, but gameplay and persistence do not need a server API.
 
----
+## Setup
 
-## Requirements
+Node.js 24 is recommended (verified locally with 24.21.0). The declared Node
+22 minimum is 22.15 because the test runner uses Node module hooks. Other
+supported versions are listed in package.json.
 
-| Tool       | Version       | Notes                                                                                                                                          |
-| ---------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Node.js    | **v24.x LTS** | Tested on v24.21.0. Node 22 also works, but shows a harmless engine warning during install (a transitive Quasar dependency declares Node 24+). |
-| npm        | **v11.x**     | Tested on v11.4.1. Ships with Node 24.                                                                                                         |
-| Quasar CLI | **v2.5.0+**   | Optional. All commands also work via `npx quasar`.                                                                                             |
+    npm ci
+    npm run dev
 
-Install Node.js from [nodejs.org](https://nodejs.org) — pick the current
-LTS release. Installing Node also installs npm.
+The development server prints its local URL and opens a browser by default.
+A global Quasar CLI installation is optional; npm scripts use the project's
+installed CLI.
 
-To install the Quasar CLI globally (optional but convenient):
+## Commands
 
-    npm install -g @quasar/cli
+| Command              | Purpose                                                 |
+| -------------------- | ------------------------------------------------------- |
+| npm run dev          | Start development with hot reload.                      |
+| npm run build        | Build the production SPA into dist/spa.                 |
+| npm run lint         | Check source, tests and configuration with ESLint.      |
+| npm run lint:fix     | Apply automatic ESLint fixes.                           |
+| npm run format       | Format maintained text files with Prettier.             |
+| npm run format:check | Check formatting without changing files.                |
+| npm run lint:check   | Check both formatting and ESLint.                       |
+| npm run typecheck    | Check TypeScript and Vue templates.                     |
+| npm test             | Run domain, store and Vue interaction regression tests. |
+| npm run check        | Run all formatting, lint, type and test checks.         |
 
----
+After changing aliases or Quasar build settings, run npx quasar prepare to
+regenerate IDE configuration. It also runs automatically after installation.
 
-## First-time setup
+## Structure
 
-From the folder that contains the project:
+    src/
+      components/       Vue components and shared presentation primitives
+        market/         Market rows, quantity controls and view types
+      css/              Global styles, design tokens and shared primitives
+      data/             City/drug catalogs and balance constants
+      domain/           Pure pricing, trades, cargo, history and game creation
+      layouts/          Application shell
+      pages/            Market plus Map/Bank placeholders
+      router/           Manual nested route table and router creation
+      services/         Browser localStorage persistence
+      stores/           Pinia orchestration and cached derived state
+      types/            Shared game and catalog types
+      utils/            Pure numeric, formatting and random helpers
+    tests/              Node tests and a Vue interaction renderer
+    docs/               Refactor findings and UI proposals
 
-    cd DustWars
-    npm install
+Dependency direction: presentation uses stores and domain helpers; stores
+coordinate the domain and browser services. Domain, data and utilities never
+import UI components, stores, browser services, Vue, Pinia or Quasar. ESLint
+enforces these boundaries.
 
-`npm install` downloads ~400 MB of dependencies into `node_modules/`.
-Expect 1–3 minutes on a decent connection.
+## Routing and deployment
 
----
+Routes are maintained in src/router/routes.ts. The root and unknown paths
+redirect to /market. /map and /bank currently show placeholders.
 
-## Running the project
+Routing uses HTML5 history. Serve dist/spa over HTTP with a fallback to
+index.html for application routes. Opening the built index.html directly
+from disk does not work. The project targets a client-side SPA.
 
-Development server with hot-reload:
+## Design and status
 
-    quasar dev
+The current theme uses antique gold on dark surfaces, with muted green and
+red accents. CSS tokens live in src/css/tokens.scss; Quasar semantic colors
+live in src/css/quasar.variables.scss. Shared buttons, chips, tooltips,
+dialogs and scrollbars are defined in src/css/components.
 
-or, if you skipped the global CLI install:
+Market trading, FIFO cargo, supply pressure, recent price history and browser
+saves are implemented. Travel, banking and profile screens are unfinished;
+debug controls are currently visible. Game-rule correctness and balancing
+are a separate next-stage audit.
 
-    npx quasar dev
-
-The browser opens automatically at **http://localhost:9000**.
-
-- Edits to `.vue`, `.ts`, and `.scss` files hot-reload instantly.
-- Edits to `quasar.config.ts` trigger a full restart.
-- Stop the dev server with `Ctrl+C` in the terminal.
-
----
-
-## Other commands
-
-| Command          | What it does                      |
-| ---------------- | --------------------------------- |
-| `quasar dev`     | Start the dev server (hot-reload) |
-| `quasar build`   | Production build → `dist/spa/`    |
-| `npm run lint`   | Run ESLint across the project     |
-| `npm run format` | Run Prettier to auto-format files |
-| `quasar clean`   | Delete build artifacts and cache  |
-
----
-
-## Tech stack
-
-| Layer         | Choice                                    |
-| ------------- | ----------------------------------------- |
-| Framework     | Vue 3 (Composition API, `<script setup>`) |
-| Component kit | Quasar Framework v2                       |
-| Language      | TypeScript (strict mode)                  |
-| State         | Pinia                                     |
-| Routing       | Vue Router (hash mode)                    |
-| Styling       | SCSS                                      |
-| Bundler       | Vite (via Quasar CLI)                     |
-| Linting       | ESLint + Prettier + vite-plugin-checker   |
-| Rendering     | Client-only SPA — no SSR                  |
-
-No backend, no database. Game state lives in memory, and will be
-persisted to `localStorage` later.
-
----
-
-## Project structure
-
-    DustWars/
-    ├── public/                 static assets served as-is
-    ├── src/
-    │   ├── components/         reusable Vue components
-    │   ├── css/                global styles + design tokens
-    │   ├── data/               static definitions (cities, drugs, cars)
-    │   ├── domain/             pure game logic — no Vue, no Pinia
-    │   ├── layouts/            page shells (topbar + sidebar grid)
-    │   ├── pages/              one folder per screen (market, map, bank, log)
-    │   ├── router/             route table + vue-router setup
-    │   ├── stores/             Pinia stores (game, market, world)
-    │   ├── types/              TypeScript type definitions
-    │   └── utils/              small pure helpers (formatting, RNG)
-    ├── quasar.config.ts        Quasar build + alias config
-    ├── tsconfig.json           TS config (extends .quasar/tsconfig.json)
-    └── package.json
-
-**Dependency rule:** `domain/` and `data/` never import from `stores/`,
-`components/`, `pages/`, or `layouts/`. `utils/` is pure and may be
-imported from anywhere.
-
----
-
-## Design
-
-Dark, dim, easy on the eyes. Antique gold on near-black, with muted
-forest-green and wine-red accents.
-
-The palette is defined once in `src/css/tokens.scss` as CSS custom
-properties. Components reference those variables — `var(--gold)`,
-`var(--wine-soft)` — rather than hard-coded color values. Quasar's
-own semantic colors are mapped in `src/css/quasar.variables.scss`.
-
-Base font size is 16px. Prices and stat values are 20px. Trade log
-text is 15px. These are set as tokens and should not be shrunk.
-
----
-
-## Status
-
-Early development.
+See [the refactor review](docs/refactor-review.md) for the architecture,
+validation and queued logic findings, and [UI proposals](docs/ui-review.md)
+for suggested visual/interaction changes awaiting approval.

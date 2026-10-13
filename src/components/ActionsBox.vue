@@ -1,26 +1,26 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import { Notify } from 'quasar'
-import { useGameStore } from 'stores/game'
-import Panel from './Panel.vue'
+import { storeToRefs } from 'pinia';
+import { Notify } from 'quasar';
+import { useGameStore } from 'stores/game';
+import Panel from './Panel.vue';
 
-const game = useGameStore()
-const { city, day } = storeToRefs(game)
+const game = useGameStore();
+const { city, day } = storeToRefs(game);
 
 function openMap() {
   Notify.create({
     type: 'info',
     message: 'Travel map coming soon.',
-  })
+  });
 }
 
 function nextDay() {
-  game.advanceDay(1)
+  game.advanceDay(1);
   Notify.create({
     type: 'info',
     message: `Day ${day.value}`,
     timeout: 1100,
-  })
+  });
 }
 </script>
 
@@ -57,7 +57,7 @@ function nextDay() {
 .current__label {
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: .18em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--muted-2);
 }

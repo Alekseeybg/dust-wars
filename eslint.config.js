@@ -6,84 +6,24 @@ import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescri
 import prettierSkipFormatting from '@vue/eslint-config-prettier/skip-formatting';
 
 export default defineConfigWithVueTs(
-  {
-    /**
-     * Ignore the following files.
-     * Please note that pluginQuasar.configs.recommended() already ignores
-     * the "node_modules" folder for you (and all other Quasar project
-     * relevant folders and files).
-     *
-     * ESLint requires "ignores" key to be the only one in this object
-     */
-    // ignores: []
-  },
-
+  { ignores: ['.tmp/**'] },
   pluginQuasar.configs.recommended(),
   js.configs.recommended,
-
-  /**
-   * https://eslint.vuejs.org
-   *
-   * pluginVue.configs.base
-   *   -> Settings and rules to enable correct ESLint parsing.
-   * pluginVue.configs[ 'flat/essential']
-   *   -> base, plus rules to prevent errors or unintended behavior.
-   * pluginVue.configs["flat/strongly-recommended"]
-   *   -> Above, plus rules to considerably improve code readability and/or dev experience.
-   * pluginVue.configs["flat/recommended"]
-   *   -> Above, plus rules to enforce subjective community defaults to ensure consistency.
-   */
   pluginVue.configs['flat/essential'],
-
-  {
-    files: ['**/*.ts', '**/*.vue'],
-    rules: {
-      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
-    },
-  },
-  // https://github.com/vuejs/eslint-config-typescript
   vueTsConfigs.recommendedTypeChecked,
-
   {
     languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-
-      globals: {
-        ...globals.browser,
-        ...globals.node, // SSR, Electron, config files
-        process: 'readonly', // process.env.*
-        ga: 'readonly', // Google Analytics
-        cordova: 'readonly',
-        Capacitor: 'readonly',
-        chrome: 'readonly', // BEX related
-        browser: 'readonly', // BEX related
-      },
+      globals: { ...globals.browser, ...globals.node },
     },
-
-    // add your custom rules here
     rules: {
-      'prefer-promise-reject-errors': 'off',
-      // slots use the "#" shorthand everywhere, as in the Quasar docs
+      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
       'vue/v-slot-style': ['warn', 'shorthand'],
       'vue/multi-word-component-names': 'off',
-
-      // allow debugger during development only
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     },
   },
-
   {
-    files: ['src-pwa/sw/**/*.ts'],
-    languageOptions: {
-      globals: {
-        ...globals.serviceworker,
-      },
-    },
-  },
-
-  {
-    files: ['src/domain/**/*.ts', 'src/data/**/*.ts'],
+    files: ['src/domain/**/*.ts', 'src/data/**/*.ts', 'src/utils/**/*.ts'],
     rules: {
       '@typescript-eslint/no-restricted-imports': [
         'error',
@@ -91,24 +31,49 @@ export default defineConfigWithVueTs(
           patterns: [
             {
               group: [
+                'vue',
+                'vue/*',
+                'pinia',
+                'quasar',
                 'stores',
-                'stores/*',
+                'stores/**',
+                '**/stores',
+                '**/stores/**',
                 'components',
-                'components/*',
+                'components/**',
+                '**/components',
+                '**/components/**',
                 'pages',
-                'pages/*',
+                'pages/**',
+                '**/pages',
+                '**/pages/**',
                 'layouts',
-                'layouts/*',
+                'layouts/**',
+                '**/layouts',
+                '**/layouts/**',
+                'services',
+                'services/**',
+                '**/services',
+                '**/services/**',
               ],
               message:
-                'domain/ and data/ must not import from UI layers. ' +
-                'Dependencies flow UI → domain → data.',
+                'Keep domain, data and utilities independent of UI, stores and browser services.',
             },
           ],
         },
       ],
     },
   },
-
+  {
+    files: ['src/domain/**/*.ts', 'src/data/**/*.ts', 'src/utils/**/*.ts'],
+    rules: {
+      'no-restricted-globals': ['error', 'window', 'document', 'localStorage', 'sessionStorage'],
+    },
+  },
+  {
+    files: ['tests/**/*.mjs'],
+    extends: [vueTsConfigs.disableTypeChecked],
+    languageOptions: { globals: globals.node },
+  },
   prettierSkipFormatting,
 );

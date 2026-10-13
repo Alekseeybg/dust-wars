@@ -1,9 +1,10 @@
-import type { CargoLot, DrugId } from 'types';
+import type { CargoLot, CargoLots, CargoGroup, DrugId } from 'types';
+import { getDrug } from 'data/drugs';
 
 /**
  * Total units held for a drug, summed across its lots.
  */
-export function heldQty(lots: Partial<Record<DrugId, CargoLot[]>>, drugId: DrugId): number {
+export function heldQty(lots: CargoLots, drugId: DrugId): number {
   const list = lots[drugId];
   if (!list) return 0;
   let total = 0;
@@ -12,7 +13,7 @@ export function heldQty(lots: Partial<Record<DrugId, CargoLot[]>>, drugId: DrugI
 }
 
 /** Total units held across all drugs. */
-export function totalHeld(lots: Partial<Record<DrugId, CargoLot[]>>): number {
+export function totalHeld(lots: CargoLots): number {
   let total = 0;
   for (const list of Object.values(lots)) {
     if (!list) continue;
@@ -27,12 +28,12 @@ export function totalHeld(lots: Partial<Record<DrugId, CargoLot[]>>): number {
  * days or different prices stay separate so the player sees the batches.
  */
 export function addLot(
-  lots: Partial<Record<DrugId, CargoLot[]>>,
+  lots: CargoLots,
   drugId: DrugId,
   qty: number,
   price: number,
   day: number,
-): Partial<Record<DrugId, CargoLot[]>> {
+): CargoLots {
   const list = [...(lots[drugId] ?? [])];
   const last = list[list.length - 1];
 
@@ -46,7 +47,7 @@ export function addLot(
 }
 
 export interface RemoveResult {
-  lots: Partial<Record<DrugId, CargoLot[]>>;
+  lots: CargoLots;
   /** Cost basis (dollars) of the units actually removed, under FIFO. */
   costRemoved: number;
 }
@@ -55,12 +56,8 @@ export interface RemoveResult {
  * Remove qty from a drug, consuming lots oldest-first (FIFO). The
  * caller is responsible for validating that qty ≤ total held.
  */
-export function removeLots(
-  lots: Partial<Record<DrugId, CargoLot[]>>,
-  drugId: DrugId,
-  qty: number,
-): RemoveResult {
-  const list = [...(lots[drugId] ?? [])];
+export function removeLots(lots: CargoLots, drugId: DrugId, qty: number): RemoveResult {
+  const list = lots[drugId] ?? [];
   let remaining = qty;
   let costRemoved = 0;
   const kept: CargoLot[] = [];
@@ -87,4 +84,22 @@ export function removeLots(
   else delete next[drugId];
 
   return { lots: next, costRemoved };
+}
+
+/** Group cargo in purchase order for the hold and its detail dialog. */
+export function groupCargo(lots: CargoLots): CargoGroup[] {
+  const groups: CargoGroup[] = [];
+  for (const [id, batches] of Object.entries(lots)) {
+    if (!batches?.length) continue;
+    const drugId = id as DrugId;
+    const drug = getDrug(drugId);
+    groups.push({
+      id: drugId,
+      name: drug.name,
+      swatch: drug.swatch,
+      total: heldQty(lots, drugId),
+      lots: batches,
+    });
+  }
+  return groups;
 }

@@ -26,8 +26,8 @@ export interface Drug {
   id: DrugId;
   name: string;
   tier: DrugTier;
-  base: number;
-  vol: number;
+  basePrice: number;
+  volatility: number;
   swatch: string;
   description: string;
 }
@@ -62,6 +62,16 @@ export interface CargoLot {
   qty: number;
   price: number;
   day: number;
+}
+
+export type CargoLots = Partial<Record<DrugId, CargoLot[]>>;
+
+export interface CargoGroup {
+  id: DrugId;
+  name: string;
+  swatch: string;
+  total: number;
+  lots: CargoLot[];
 }
 
 // -----------------------------------------------------------------------------
@@ -99,6 +109,13 @@ export interface LogEntry {
 // -----------------------------------------------------------------------------
 
 export type PriceTrend = 'up' | 'down' | 'flat';
+
+export type TradeDirection = 'buy' | 'sell';
+
+export interface SupplyPressure {
+  amount: number;
+  kind: 'neutral' | 'scarce' | 'glutted';
+}
 
 export type SupplyState = Partial<Record<CityId, Partial<Record<DrugId, number>>>>;
 
@@ -147,7 +164,7 @@ export interface GameState {
    * are both derived from this — there is no separate cargo/cargoCost
    * map, by design.
    */
-  cargoLots: Partial<Record<DrugId, CargoLot[]>>;
+  cargoLots: CargoLots;
 
   capacity: number;
   log: LogEntry[];

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useGameStore, LIMITS } from 'stores/game';
+import { useGameStore } from 'stores/game';
+import { CONFIG } from 'data/config';
 import { money } from 'utils/format';
 import HeatMeter from './HeatMeter.vue';
 
@@ -51,7 +52,7 @@ const debtStr = computed(() => money(debt.value));
         <div class="stat">
           <span class="stat__label">Day</span>
           <span class="stat__value mono">
-            {{ day }}<span class="stat__of">/{{ LIMITS.MAX_DAYS }}</span>
+            {{ day }}<span class="stat__of">/{{ CONFIG.MAX_DAYS }}</span>
           </span>
         </div>
 
@@ -64,7 +65,7 @@ const debtStr = computed(() => money(debt.value));
 
         <span class="stat__sep" aria-hidden="true" />
 
-        <HeatMeter :level="heat" :max="LIMITS.HEAT_MAX" />
+        <HeatMeter :level="heat" :max="CONFIG.HEAT_MAX" />
       </div>
 
       <!-- Right column kept empty for now; reserved for global nav

@@ -1,46 +1,24 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useGameStore } from 'stores/game'
-import { getDrug } from 'data/drugs'
-import type { DrugId } from 'types'
-import Panel from './Panel.vue'
-import CargoDialog from './CargoDialog.vue'
+import { computed, ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useGameStore } from 'stores/game';
+import type { DrugId } from 'types';
+import Panel from './Panel.vue';
+import CargoDialog from './CargoDialog.vue';
 
-const game = useGameStore()
-const { cargoLots, capacity } = storeToRefs(game)
+const game = useGameStore();
+const { cargoGroups: items, cargoUsed: used, capacity } = storeToRefs(game);
 
-const showDialog = ref(false)
-const dialogFocusId = ref<DrugId | null>(null)
+const showDialog = ref(false);
+const dialogFocusId = ref<DrugId | null>(null);
 
-const used = computed(() => game.cargoUsed)
-const pct = computed(() => Math.min(100, (used.value / capacity.value) * 100))
-const warn = computed(() => pct.value >= 90)
-
-interface DrugSummary {
-  id: DrugId
-  name: string
-  swatch: string
-  total: number
-}
-
-const items = computed<DrugSummary[]>(() => {
-  const rows: DrugSummary[] = []
-  for (const [id, lots] of Object.entries(cargoLots.value)) {
-    if (!lots || lots.length === 0) continue
-    const drugId = id as DrugId
-    const drug = getDrug(drugId)
-    let total = 0
-    for (const lot of lots) total += lot.qty
-    rows.push({ id: drugId, name: drug.name, swatch: drug.swatch, total })
-  }
-  return rows
-})
+const pct = computed(() => Math.min(100, (used.value / capacity.value) * 100));
+const warn = computed(() => pct.value >= 90);
 
 function openDialog(drugId: DrugId | null = null) {
-  if (items.value.length === 0) return
-  dialogFocusId.value = drugId
-  showDialog.value = true
+  if (items.value.length === 0) return;
+  dialogFocusId.value = drugId;
+  showDialog.value = true;
 }
 </script>
 
@@ -74,7 +52,6 @@ function openDialog(drugId: DrugId | null = null) {
   </Panel>
 </template>
 
-
 <style lang="scss" scoped>
 .capacity {
   display: flex;
@@ -86,7 +63,7 @@ function openDialog(drugId: DrugId | null = null) {
 .capacity__label {
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: .18em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--muted-2);
 }
@@ -135,7 +112,7 @@ function openDialog(drugId: DrugId | null = null) {
 }
 
 .cargo__row:hover {
-  background: rgba(255, 255, 255, .03);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .cargo__name {
@@ -150,7 +127,7 @@ function openDialog(drugId: DrugId | null = null) {
   width: 3px;
   height: 14px;
   border-radius: 2px;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, .25);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
 }
 
 .cargo__qty {
@@ -171,7 +148,7 @@ function openDialog(drugId: DrugId | null = null) {
   font-family: var(--sans);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: .18em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   text-align: center;
   color: var(--muted);
@@ -179,12 +156,15 @@ function openDialog(drugId: DrugId | null = null) {
   border: 1px solid var(--stroke);
   border-radius: 5px;
   cursor: pointer;
-  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+  transition:
+    color 120ms ease,
+    background 120ms ease,
+    border-color 120ms ease;
 }
 
 .view-all:hover {
   color: var(--gold-soft);
-  background: rgba(184, 137, 63, .06);
-  border-color: rgba(184, 137, 63, .28);
+  background: rgba(184, 137, 63, 0.06);
+  border-color: rgba(184, 137, 63, 0.28);
 }
 </style>

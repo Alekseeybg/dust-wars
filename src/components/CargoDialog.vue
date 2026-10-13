@@ -1,107 +1,52 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
-import { storeToRefs } from 'pinia'
-import { QDialog } from 'quasar'
-import { useGameStore } from 'stores/game'
-import { getDrug } from 'data/drugs'
-import type { CargoLot, DrugId } from 'types'
-import { money } from 'utils/format'
+import { useTemplateRef } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useGameStore } from 'stores/game';
+import type { DrugId } from 'types';
+import { money } from 'utils/format';
+import BaseDialog from './BaseDialog.vue';
 
-const show = defineModel<boolean>({ required: true })
-const props = defineProps<{
-  /** If set, the dialog scrolls to this drug's section on open. */
-  focusDrugId?: DrugId | null
-}>()
+const show = defineModel<boolean>({ required: true });
+const props = defineProps<{ focusDrugId?: DrugId | null }>();
+const game = useGameStore();
+const { cargoGroups: groups, cargoUsed: used, capacity } = storeToRefs(game);
+const dialog = useTemplateRef<InstanceType<typeof BaseDialog>>('dialog');
 
-const game = useGameStore()
-const { cargoLots, capacity } = storeToRefs(game)
-
-const bodyRef = ref<HTMLElement | null>(null)
-
-interface DrugGroup {
-  id: DrugId
-  name: string
-  swatch: string
-  total: number
-  lots: CargoLot[]
+// QDialog emits show after its opening transition, so no timer is needed.
+function focusDrug() {
+  if (props.focusDrugId) dialog.value?.scrollTo(`[data-drug-id="${props.focusDrugId}"]`);
 }
-
-const groups = computed<DrugGroup[]>(() => {
-  const rows: DrugGroup[] = []
-  for (const [id, lots] of Object.entries(cargoLots.value)) {
-    if (!lots || lots.length === 0) continue
-    const drugId = id as DrugId
-    const drug = getDrug(drugId)
-    let total = 0
-    for (const lot of lots) total += lot.qty
-    rows.push({ id: drugId, name: drug.name, swatch: drug.swatch, total, lots })
-  }
-  return rows
-})
-
-const used = computed(() => game.cargoUsed)
-
-function close() {
-  show.value = false
-}
-
-/**
- * On open: if a focus drug was passed, scroll its section into view.
- * Delayed slightly so the dialog's own open transition settles first —
- * a scroll started mid-animation lands at the wrong offset.
- */
-watch(show, async (isOpen) => {
-  if (!isOpen) return
-  await nextTick()
-  const target = props.focusDrugId
-  if (!target || !bodyRef.value) return
-
-  setTimeout(() => {
-    if (!bodyRef.value) return
-    const el = bodyRef.value.querySelector<HTMLElement>(
-      `[data-drug-id="${target}"]`,
-    )
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }, 180)
-})
 </script>
 
 <template>
-  <QDialog v-model="show">
-    <div class="dust-dialog dust-dialog--cargo">
-      <header class="dust-dialog__head">
-        <div class="dust-dialog__titles">
-          <h2 class="dust-dialog__title">Cargo Hold</h2>
-          <span class="dust-dialog__sub mono">{{ used }} / {{ capacity }} used</span>
-        </div>
-        <button class="dust-dialog__close" type="button" aria-label="Close" @click="close">×</button>
+  <BaseDialog
+    ref="dialog"
+    v-model="show"
+    title="Cargo Hold"
+    variant="cargo"
+    :subtitle="`${used} / ${capacity} used`"
+    @show="focusDrug"
+  >
+    <div v-if="groups.length === 0" class="dust-dialog__empty">Your hold is empty.</div>
+
+    <section v-for="group in groups" :key="group.id" class="group" :data-drug-id="group.id">
+      <header class="group__head">
+        <span class="group__swatch" :style="{ background: group.swatch }" />
+        <span class="group__name">{{ group.name }}</span>
+        <span class="group__total mono">{{ group.total }}g</span>
       </header>
 
-      <div ref="bodyRef" class="dust-dialog__body dust-scroll">
-        <div v-if="groups.length === 0" class="dust-dialog__empty">
-          Your hold is empty.
-        </div>
-
-        <section v-for="group in groups" :key="group.id" class="group" :data-drug-id="group.id">
-          <header class="group__head">
-            <span class="group__swatch" :style="{ background: group.swatch }" />
-            <span class="group__name">{{ group.name }}</span>
-            <span class="group__total mono">{{ group.total }}g</span>
-          </header>
-
-          <ul class="lots">
-            <li v-for="(lot, i) in group.lots" :key="i" class="lot">
-              <span class="lot__qty mono">{{ lot.qty }}g</span>
-              <span class="lot__sep">at</span>
-              <span class="lot__price mono">{{ money(lot.price) }}</span>
-              <span class="lot__sep lot__sep--day">day</span>
-              <span class="lot__day mono">D{{ lot.day }}</span>
-            </li>
-          </ul>
-        </section>
-      </div>
-    </div>
-  </QDialog>
+      <ul class="lots">
+        <li v-for="(lot, i) in group.lots" :key="i" class="lot">
+          <span class="lot__qty mono">{{ lot.qty }}g</span>
+          <span class="lot__sep">at</span>
+          <span class="lot__price mono">{{ money(lot.price) }}</span>
+          <span class="lot__sep lot__sep--day">day</span>
+          <span class="lot__day mono">D{{ lot.day }}</span>
+        </li>
+      </ul>
+    </section>
+  </BaseDialog>
 </template>
 
 <style lang="scss" scoped>
@@ -128,7 +73,7 @@ watch(show, async (isOpen) => {
   width: 4px;
   height: 18px;
   border-radius: 2px;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, .25);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
 }
 
 .group__name {
@@ -136,7 +81,7 @@ watch(show, async (isOpen) => {
   font-size: 17px;
   font-weight: 600;
   color: var(--text);
-  letter-spacing: .01em;
+  letter-spacing: 0.01em;
 }
 
 .group__total {
@@ -158,7 +103,7 @@ watch(show, async (isOpen) => {
   gap: 8px;
   padding: 8px 12px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, .015);
+  background: rgba(255, 255, 255, 0.015);
   border: 1px solid var(--stroke);
 }
 
@@ -172,7 +117,7 @@ watch(show, async (isOpen) => {
 .lot__sep {
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: .14em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted-2);
   text-align: center;

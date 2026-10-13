@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { CONFIG } from 'data/config';
 
 const props = defineProps<{ level: number; max: number }>();
 
-const hot = computed(() => props.level >= 6);
+const hot = computed(() => props.level >= CONFIG.HEAT_WARNING_LEVEL);
 const pips = computed(() => Array.from({ length: props.max }, (_, i) => i < props.level));
 </script>
 
@@ -14,6 +15,7 @@ const pips = computed(() => Array.from({ length: props.max }, (_, i) => i < prop
       class="meter"
       :class="{ 'meter--hot': hot }"
       role="meter"
+      aria-label="Heat"
       :aria-valuenow="level"
       aria-valuemin="0"
       :aria-valuemax="max"

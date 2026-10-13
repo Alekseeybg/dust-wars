@@ -18,7 +18,7 @@ import type { City, CityId } from 'types';
  *   - Every drug has at least one clear cheap city and one clear
  *     expensive city, so a trading route exists for it.
  */
-export const CITIES: City[] = [
+export const CITIES: readonly City[] = [
   {
     id: 'bronx',
     name: 'The Bronx',

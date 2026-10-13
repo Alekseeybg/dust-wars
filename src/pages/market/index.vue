@@ -1,56 +1,52 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { storeToRefs } from 'pinia'
-import { Notify } from 'quasar'
-import { useGameStore } from 'stores/game'
-import { DRUGS } from 'data/drugs'
-import { supplyAt, supplyPressure } from 'domain/pricing'
-import type { DrugId, PricePoint } from 'types'
-import Panel from 'components/Panel.vue'
-import StreetLog from 'components/StreetLog.vue'
-import DrugRow, { type MarketRow } from 'components/market/DrugRow.vue'
+import { computed, ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { Notify } from 'quasar';
+import { useGameStore } from 'stores/game';
+import { DRUGS } from 'data/drugs';
+import { supplyAt, supplyPressure } from 'domain/pricing';
+import type { DrugId, PricePoint } from 'types';
+import Panel from 'components/Panel.vue';
+import StreetLog from 'components/StreetLog.vue';
+import DrugRow from 'components/market/DrugRow.vue';
+import type { MarketRow } from 'components/market/types';
 
-const game = useGameStore()
-const { market, supply, city, cash, capacity } = storeToRefs(game)
+const game = useGameStore();
+const { market, supply, city, cash, freeCapacity } = storeToRefs(game);
 
 /** Bumping this causes every row to reset its local quantities to 1. */
-const resetSignal = ref(0)
+const resetSignal = ref(0);
 function resetAllQuantities() {
-  resetSignal.value += 1
+  resetSignal.value += 1;
 }
 
-const freeSpace = computed(() => capacity.value - game.cargoUsed)
-
 const rows = computed<MarketRow[]>(() => {
-  if (!market.value) return []
+  const snapshot = market.value;
+  if (!snapshot) return [];
   return DRUGS.map((drug) => {
-    const supplyLevel = supplyAt(supply.value, game.cityId, drug.id)
+    const supplyLevel = supplyAt(supply.value, game.cityId, drug.id);
     return {
       drug,
-      price: market.value!.prices[drug.id],
-      trend: market.value!.trends[drug.id],
+      price: snapshot.prices[drug.id],
+      trend: snapshot.trends[drug.id],
       held: game.heldQty(drug.id),
       pressure: supplyPressure(supplyLevel),
-    }
-  })
-})
+    };
+  });
+});
 
 function historyFor(drugId: DrugId): PricePoint[] {
-  return game.marketHistory[game.cityId]?.[drugId] ?? []
+  return game.marketHistory[game.cityId]?.[drugId] ?? [];
 }
 
 function maxBuyFor(price: number): number {
-  const byCash = Math.floor(cash.value / price)
-  return Math.max(0, Math.min(byCash, freeSpace.value))
+  const byCash = Math.floor(cash.value / price);
+  return Math.max(0, Math.min(byCash, freeCapacity.value));
 }
 
-function onBuy(drugId: DrugId, qty: number) {
-  const result = game.buy(drugId, qty)
-  if (!result.ok) Notify.create({ type: 'negative', message: result.reason })
-}
-function onSell(drugId: DrugId, qty: number) {
-  const result = game.sell(drugId, qty)
-  if (!result.ok) Notify.create({ type: 'negative', message: result.reason })
+function trade(direction: 'buy' | 'sell', drugId: DrugId, qty: number) {
+  const result = game[direction](drugId, qty);
+  if (!result.ok) Notify.create({ type: 'negative', message: result.reason });
 }
 </script>
 
@@ -58,9 +54,7 @@ function onSell(drugId: DrugId, qty: number) {
   <div class="market-page">
     <Panel title="Market" :subtitle="city.name">
       <template #action>
-        <button class="reset-all" type="button" @click="resetAllQuantities">
-          Reset Qty
-        </button>
+        <button class="panel-action" type="button" @click="resetAllQuantities">Reset Qty</button>
       </template>
 
       <div v-if="!market" class="empty">Market data unavailable.</div>
@@ -76,8 +70,16 @@ function onSell(drugId: DrugId, qty: number) {
         </div>
 
         <div class="drugs__body">
-          <DrugRow v-for="row in rows" :key="row.drug.id" :row="row" :max-buy="maxBuyFor(row.price)"
-            :history="historyFor(row.drug.id)" :reset-signal="resetSignal" @buy="onBuy" @sell="onSell" />
+          <DrugRow
+            v-for="row in rows"
+            :key="row.drug.id"
+            :row="row"
+            :max-buy="maxBuyFor(row.price)"
+            :history="historyFor(row.drug.id)"
+            :reset-signal="resetSignal"
+            @buy="(id, qty) => trade('buy', id, qty)"
+            @sell="(id, qty) => trade('sell', id, qty)"
+          />
         </div>
       </div>
     </Panel>
@@ -91,28 +93,6 @@ function onSell(drugId: DrugId, qty: number) {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.reset-all {
-  padding: 4px 8px;
-  font-family: var(--sans);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--muted);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
-  white-space: nowrap;
-}
-
-.reset-all:hover {
-  color: var(--gold-soft);
-  background: rgba(184, 137, 63, .08);
-  border-color: rgba(184, 137, 63, .18);
 }
 
 .drugs {
@@ -132,17 +112,16 @@ function onSell(drugId: DrugId, qty: number) {
   min-height: 46px;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: .20em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #b5a795;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, .025) 0%, rgba(255, 255, 255, 0) 60%),
-    #050507;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0%, rgba(255, 255, 255, 0) 60%), #050507;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .05),
-    inset 0 -1px 0 rgba(0, 0, 0, .65),
-    0 12px 22px -10px rgba(0, 0, 0, .95),
-    0 5px 10px -4px rgba(0, 0, 0, .6);
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.65),
+    0 12px 22px -10px rgba(0, 0, 0, 0.95),
+    0 5px 10px -4px rgba(0, 0, 0, 0.6);
 }
 
 .drugs__head::before {
@@ -152,7 +131,14 @@ function onSell(drugId: DrugId, qty: number) {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(184, 137, 63, .25) 12%, rgba(184, 137, 63, .70) 50%, rgba(184, 137, 63, .25) 88%, transparent 100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(184, 137, 63, 0.25) 12%,
+    rgba(184, 137, 63, 0.7) 50%,
+    rgba(184, 137, 63, 0.25) 88%,
+    transparent 100%
+  );
   pointer-events: none;
 }
 
@@ -163,7 +149,7 @@ function onSell(drugId: DrugId, qty: number) {
   right: 0;
   top: 100%;
   height: 10px;
-  background: linear-gradient(180deg, rgba(184, 137, 63, .05), transparent);
+  background: linear-gradient(180deg, rgba(184, 137, 63, 0.05), transparent);
   pointer-events: none;
 }
 
@@ -175,7 +161,7 @@ function onSell(drugId: DrugId, qty: number) {
 }
 
 .drugs__head-cell--divided {
-  border-left: 1px solid rgba(255, 255, 255, .04);
+  border-left: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .drugs__body {
@@ -192,7 +178,6 @@ function onSell(drugId: DrugId, qty: number) {
 }
 
 @media (max-width: 1500px) {
-
   .drugs__head,
   .drugs__head::before,
   .drugs__head::after {

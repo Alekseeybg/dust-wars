@@ -14,6 +14,8 @@ export const CONFIG = {
   START_HEALTH_MAX: 50,
 
   HEAT_MAX: 10,
+  HEAT_WARNING_LEVEL: 6,
+  PRICE_HISTORY_LIMIT: 4,
 
   /**
    * Days between market price refreshes. Prices are identical for every

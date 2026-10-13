@@ -1,25 +1,28 @@
 <script setup lang="ts">
+import { clamp } from 'utils/math';
+
 const model = defineModel<number>({ required: true });
-const props = withDefaults(defineProps<{ min?: number; max?: number }>(), {
+const props = withDefaults(defineProps<{ min?: number; max?: number; label?: string }>(), {
   min: 1,
   max: 9999,
+  label: 'Quantity',
 });
 
-function clamp(value: number): number {
-  return Math.max(props.min, Math.min(props.max, value));
+function bounded(value: number): number {
+  return clamp(value, props.min, props.max);
 }
 
 function decrement() {
-  model.value = clamp(model.value - 1);
+  model.value = bounded(model.value - 1);
 }
 
 function increment() {
-  model.value = clamp(model.value + 1);
+  model.value = bounded(model.value + 1);
 }
 
 function onInput(event: Event) {
   const raw = Number((event.target as HTMLInputElement).value);
-  model.value = clamp(Number.isFinite(raw) ? Math.floor(raw) : props.min);
+  model.value = bounded(Number.isFinite(raw) ? Math.floor(raw) : props.min);
 }
 </script>
 
@@ -37,6 +40,7 @@ function onInput(event: Event) {
     <input
       class="qty__input mono"
       type="number"
+      :aria-label="label"
       :value="model"
       :min="min"
       :max="max"
