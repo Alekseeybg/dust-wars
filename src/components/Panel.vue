@@ -1,12 +1,19 @@
 <script setup lang="ts">
-defineProps<{ title: string; meta?: string }>();
+defineProps<{
+  title: string
+  meta?: string
+  metaLabel?: string
+}>()
 </script>
 
 <template>
   <section class="panel">
     <header class="panel__head">
       <h2 class="panel__title">{{ title }}</h2>
-      <span v-if="meta" class="panel__meta mono">{{ meta }}</span>
+      <div v-if="meta" class="panel__stat">
+        <span v-if="metaLabel" class="panel__stat-label">{{ metaLabel }}</span>
+        <span class="panel__stat-value">{{ meta }}</span>
+      </div>
     </header>
     <div class="panel__body">
       <slot />
@@ -17,35 +24,72 @@ defineProps<{ title: string; meta?: string }>();
 <style lang="scss" scoped>
 .panel {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0) 40%), var(--bg-panel);
+    linear-gradient(180deg, rgba(255, 255, 255, .018), rgba(255, 255, 255, 0) 40%),
+    var(--bg-panel);
   border: 1px solid var(--stroke);
-  border-radius: var(--r-md);
+  border-radius: 6px;
   overflow: hidden;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, .02),
     0 8px 24px -18px #000;
 }
+
 .panel__head {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-4);
-  padding: 14px var(--sp-5);
+  justify-content: center;
+  min-height: 56px;
+  padding: 16px 20px;
   border-bottom: 1px solid var(--stroke);
-  background: rgba(255, 255, 255, 0.012);
+  background: rgba(255, 255, 255, .014);
 }
+
 .panel__title {
-  font-size: var(--fs-xs);
+  font-size: 15px;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: .30em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--gold-soft);
+  line-height: 1.2;
+  /* Nudge right so the wide letter-spacing doesn't visually bias the
+     title one character left of true center. */
+  padding-left: .30em;
 }
-.panel__meta {
+
+.panel__stat {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  min-width: 0;
+  max-width: 240px;
+}
+
+.panel__stat-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  line-height: 1;
+}
+
+.panel__stat-value {
   font-size: var(--fs-sm);
-  color: var(--muted);
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 .panel__body {
-  padding: var(--sp-5);
+  padding: 20px;
 }
 </style>

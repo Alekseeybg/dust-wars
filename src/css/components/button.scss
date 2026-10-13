@@ -1,0 +1,105 @@
+/**
+ * Shared button primitives.
+ *
+ * Base .btn is neutral. Modifiers --buy / --sell apply the semantic
+ * tints. --split is for buttons whose left side is a label and right
+ * side is a numeric value. --lg is a larger variant for primary actions.
+ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 10px;
+  font-family: var(--sans);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--stroke-2);
+  border-radius: 5px;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.btn:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.btn:focus-visible {
+  outline: 1px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+}
+
+/* ---- buy (dusty green) ------------------------------------------------ */
+
+.btn--buy {
+  color: var(--forest-soft);
+  background: rgba(92, 122, 63, 0.12);
+  border-color: rgba(92, 122, 63, 0.34);
+}
+.btn--buy:hover:not(:disabled) {
+  background: rgba(92, 122, 63, 0.2);
+  border-color: rgba(92, 122, 63, 0.58);
+}
+.btn--buy:active:not(:disabled) {
+  background: rgba(92, 122, 63, 0.28);
+}
+
+/* ---- sell (muted wine) ------------------------------------------------ */
+
+.btn--sell {
+  color: var(--wine-soft);
+  background: rgba(138, 42, 42, 0.12);
+  border-color: rgba(138, 42, 42, 0.38);
+}
+.btn--sell:hover:not(:disabled) {
+  background: rgba(138, 42, 42, 0.2);
+  border-color: rgba(138, 42, 42, 0.6);
+}
+.btn--sell:active:not(:disabled) {
+  background: rgba(138, 42, 42, 0.28);
+}
+
+/* ---- layout modifiers ------------------------------------------------- */
+
+.btn--split {
+  justify-content: space-between;
+  min-width: 100px;
+}
+
+.btn--block {
+  width: 100%;
+}
+
+/* ---- size modifiers --------------------------------------------------- */
+
+.btn--lg {
+  padding: 9px 14px;
+  font-size: 14px;
+  min-height: 34px;
+}
+
+.btn--lg.btn--split {
+  min-width: 130px;
+}
+
+.btn__value {
+  font-weight: 700;
+  letter-spacing: 0;
+  font-size: 15px;
+}

@@ -8,7 +8,7 @@
 // -----------------------------------------------------------------------------
 
 export type DrugId =
-  'weed' | 'hash' | 'ludes' | 'speed' | 'shrooms' | 'acid' | 'opium' | 'coke' | 'fentanyl';
+  'weed' | 'hash' | 'speed' | 'shrooms' | 'acid' | 'oxy' | 'opium' | 'coke' | 'heroin' | 'fentanyl';
 
 export type CityId =
   | 'bronx'
@@ -31,30 +31,27 @@ export interface Drug {
   id: DrugId;
   name: string;
   tier: DrugTier;
-  base: number; // neutral-market reference price
+  base: number; // neutral-market reference price, $/gram
   vol: number; // 0..1 — price volatility spread
   swatch: string; // dim identifier colour
+  description: string; // one-line player-facing blurb, shown in tooltip
 }
 
 export interface City {
   id: CityId;
   name: string;
-  x: number; // map coordinates in a 1000x620 viewBox
+  x: number;
   y: number;
-  links: CityId[]; // directly reachable cities (undirected)
-  /**
-   * Per-drug price multiplier. < 1 means the drug is cheap here (buy),
-   * > 1 means expensive here (sell). Missing entries default to 1.
-   */
+  links: CityId[];
   demand: Partial<Record<DrugId, number>>;
 }
 
 export interface Car {
   id: CarId;
   name: string;
-  capacity: number; // max units of cargo
-  range: number; // miles on a full tank; 0 = no fuel system (on foot)
-  speed: number; // miles per day on the road
+  capacity: number;
+  range: number;
+  speed: number;
   price: number;
 }
 
@@ -68,6 +65,37 @@ export interface LogEntry {
   text: string;
 }
 
+// -----------------------------------------------------------------------------
+// Market
+// -----------------------------------------------------------------------------
+
+export type PriceTrend = 'up' | 'down' | 'flat';
+
+export type SupplyState = Partial<Record<CityId, Partial<Record<DrugId, number>>>>;
+
+export interface MarketPrices {
+  cityId: CityId;
+  epoch: number;
+  prices: Record<DrugId, number>;
+  trends: Record<DrugId, PriceTrend>;
+}
+
+// -----------------------------------------------------------------------------
+// Game state
+// -----------------------------------------------------------------------------
+
+export type GamePhase = 'survival' | 'building' | 'kingpin' | 'endgame';
+
+export interface UnlockedFeatures {
+  bank: boolean;
+  profile: boolean;
+}
+
+export interface PlayerHealth {
+  current: number;
+  max: number;
+}
+
 export interface GameState {
   seed: number;
   day: number;
@@ -79,4 +107,13 @@ export interface GameState {
   cargo: Partial<Record<DrugId, number>>;
   capacity: number;
   log: LogEntry[];
+
+  phase: GamePhase;
+  unlockedFeatures: UnlockedFeatures;
+  health: PlayerHealth;
+
+  supply: SupplyState;
+  market: MarketPrices | null;
 }
+
+export type TradeResult = { ok: true } | { ok: false; reason: string };

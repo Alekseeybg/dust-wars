@@ -50,6 +50,7 @@ export default defineConfig((/* ctx */) => {
         types: resolve(currentDir, 'src/types'),
         data: resolve(currentDir, 'src/data'),
         utils: resolve(currentDir, 'src/utils'),
+        domain: resolve(currentDir, 'src/domain'),
       },
 
       typescript: {
@@ -61,7 +62,7 @@ export default defineConfig((/* ctx */) => {
       // https://v2.quasar.dev/quasar-cli-vite/page-routing-with-vue-router#filename-based-routing
       filenameBasedRouting: true,
 
-      vueRouterMode: 'hash', // available values: 'hash', 'history'
+      vueRouterMode: 'history', // available values: 'hash', 'history'
       // vueRouterBase,
 
       // publicPath: '/',

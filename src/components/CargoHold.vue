@@ -1,37 +1,37 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useGameStore } from 'stores/game';
-import { getDrug } from 'data/drugs';
-import type { DrugId } from 'types';
-import Panel from './Panel.vue';
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useGameStore } from 'stores/game'
+import { getDrug } from 'data/drugs'
+import type { DrugId } from 'types'
+import Panel from './Panel.vue'
 
-const game = useGameStore();
-const { cargo, capacity } = storeToRefs(game);
+const game = useGameStore()
+const { cargo, capacity } = storeToRefs(game)
 
-const used = computed(() => game.cargoUsed);
-const pct = computed(() => Math.min(100, (used.value / capacity.value) * 100));
-const warn = computed(() => pct.value >= 90);
+const used = computed(() => game.cargoUsed)
+const pct = computed(() => Math.min(100, (used.value / capacity.value) * 100))
+const warn = computed(() => pct.value >= 90)
 
 interface CargoRow {
-  id: DrugId;
-  name: string;
-  qty: number;
+  id: DrugId
+  name: string
+  qty: number
 }
 
 const items = computed<CargoRow[]>(() => {
-  const rows: CargoRow[] = [];
+  const rows: CargoRow[] = []
   for (const [id, qty] of Object.entries(cargo.value)) {
-    if (qty == null || qty <= 0) continue;
-    const drugId = id as DrugId;
-    rows.push({ id: drugId, name: getDrug(drugId).name, qty });
+    if (qty == null || qty <= 0) continue
+    const drugId = id as DrugId
+    rows.push({ id: drugId, name: getDrug(drugId).name, qty })
   }
-  return rows;
-});
+  return rows
+})
 </script>
 
 <template>
-  <Panel title="Cargo Hold" :meta="`${used} / ${capacity}`">
+  <Panel title="Cargo Hold" :meta="`${used} / ${capacity}`" meta-label="Capacity">
     <div class="bar" :class="{ 'bar--warn': warn }">
       <div class="bar__fill" :style="{ width: pct + '%' }" />
     </div>

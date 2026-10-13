@@ -1,0 +1,74 @@
+/**
+ * Custom styling for Quasar QTooltip.
+ *
+ * Arrow: two stacked triangles — a larger one in the border colour,
+ * a smaller one in the surface colour on top. Produces a real 1px
+ * border along the arrow edges that matches the tooltip box, rather
+ * than the flat black triangle the previous version had.
+ */
+
+.q-tooltip.dust-tip {
+  overflow: visible;
+  padding: 11px 14px 12px;
+  max-width: 300px;
+
+  font-family: var(--sans);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--text);
+
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.028) 0%, rgba(255, 255, 255, 0) 50%), #0a0a0c;
+  border: 1px solid rgba(184, 137, 63, 0.28);
+  border-radius: 8px;
+  box-shadow:
+    0 18px 40px -14px rgba(0, 0, 0, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Arrow: outer triangle in the border colour. */
+.q-tooltip.dust-tip::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid rgba(184, 137, 63, 0.28);
+}
+
+/* Arrow: inner triangle in the surface colour, overlaying the outer
+   one and leaving a 1px border visible on the two sloped edges. */
+.q-tooltip.dust-tip::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 7px solid #0a0a0c;
+}
+
+.dust-tip__name {
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+  line-height: 1.1;
+}
+
+.dust-tip__desc {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text);
+}

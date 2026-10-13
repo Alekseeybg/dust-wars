@@ -1,18 +1,18 @@
-// CSS custom properties — single source of truth for the Dim Gold palette.
-// Components reference these (--gold, --wine, etc.) rather than literals.
 :root {
-  // surfaces
-  --bg-0: #050505;
-  --bg-1: #0c0a09;
-  --bg-panel: #0a0908;
-  --bg-panel-2: #100e0c;
-  --bg-inset: #060505;
+  /* ---- surfaces ---------------------------------------------------- */
+  /* Neutral-cool blacks. Warm tints come from accents and text, not
+     from the surfaces themselves — keeps the brown out of the UI. */
+  --bg-0: #050506;
+  --bg-1: #0a0a0c;
+  --bg-panel: #0a0a0c;
+  --bg-panel-2: #101013;
+  --bg-inset: #050506;
 
-  // strokes
+  /* ---- strokes ----------------------------------------------------- */
   --stroke: rgba(255, 255, 255, 0.055);
   --stroke-2: rgba(255, 255, 255, 0.1);
 
-  // accents
+  /* ---- accents ----------------------------------------------------- */
   --gold: #b8893f;
   --gold-soft: #d4a860;
   --gold-dim: #6b4d20;
@@ -25,7 +25,7 @@
 
   --violet: #8b6fe0;
 
-  // type
+  /* ---- type -------------------------------------------------------- */
   --text: #d4c9b8;
   --muted: #7a7068;
   --muted-2: #4a443d;
@@ -33,7 +33,6 @@
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
 
-  // type scale — do not shrink these
   --fs-label: 11px;
   --fs-xs: 13.5px;
   --fs-sm: 15px;
@@ -42,7 +41,6 @@
   --fs-lg: 20px;
   --fs-xl: 24px;
 
-  // spacing
   --sp-1: 4px;
   --sp-2: 8px;
   --sp-3: 12px;
@@ -52,12 +50,10 @@
   --sp-7: 32px;
   --sp-8: 48px;
 
-  // radius
   --r-sm: 3px;
   --r-md: 5px;
   --r-lg: 8px;
 
-  // motion
   --t-fast: 120ms ease;
   --t-med: 220ms ease;
 }

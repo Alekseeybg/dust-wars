@@ -1,5 +1,12 @@
 // Global stylesheet entry — Quasar's config loads this file; it pulls the
 // others in via @use (which also emits their CSS output).
+
+// Foundation
 @use './tokens';
 @use './base';
 @use './quasar-overrides';
+
+// Shared component primitives
+@use './components/button';
+@use './components/chip';
+@use './components/tooltip';
