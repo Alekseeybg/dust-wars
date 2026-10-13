@@ -9,7 +9,6 @@ const routes: RouteRecordRaw[] = [
       { path: 'market', name: 'market', component: () => import('pages/market/index.vue') },
       { path: 'map', name: 'map', component: () => import('pages/map/index.vue') },
       { path: 'bank', name: 'bank', component: () => import('pages/bank/index.vue') },
-      { path: 'log', name: 'log', component: () => import('pages/log/index.vue') },
     ],
   },
   { path: '/:catchAll(.*)*', redirect: '/market' },

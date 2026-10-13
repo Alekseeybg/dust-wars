@@ -1,6 +1,7 @@
 <script setup lang="ts">
 defineProps<{
   title: string
+  subtitle?: string
   meta?: string
   metaLabel?: string
 }>()
@@ -9,10 +10,20 @@ defineProps<{
 <template>
   <section class="panel">
     <header class="panel__head">
-      <h2 class="panel__title">{{ title }}</h2>
-      <div v-if="meta" class="panel__stat">
-        <span v-if="metaLabel" class="panel__stat-label">{{ metaLabel }}</span>
-        <span class="panel__stat-value">{{ meta }}</span>
+      <div class="panel__title-block">
+        <h2 class="panel__title">{{ title }}</h2>
+        <span v-if="subtitle" class="panel__subtitle">{{ subtitle }}</span>
+      </div>
+
+      <div class="panel__right">
+        <!-- If the parent supplies an action slot, it takes over the
+             right side. Otherwise, fall back to the meta stat display. -->
+        <slot name="action">
+          <div v-if="meta" class="panel__stat">
+            <span v-if="metaLabel" class="panel__stat-label">{{ metaLabel }}</span>
+            <span class="panel__stat-value">{{ meta }}</span>
+          </div>
+        </slot>
       </div>
     </header>
     <div class="panel__body">
@@ -39,35 +50,56 @@ defineProps<{
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 56px;
-  padding: 16px 20px;
+  min-height: 60px;
+  padding: 14px 18px;
   border-bottom: 1px solid var(--stroke);
   background: rgba(255, 255, 255, .014);
 }
 
+.panel__title-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
 .panel__title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: .30em;
+  letter-spacing: .26em;
   text-transform: uppercase;
   color: var(--gold-soft);
   line-height: 1.2;
-  /* Nudge right so the wide letter-spacing doesn't visually bias the
-     title one character left of true center. */
-  padding-left: .30em;
+  padding-left: .26em;
+}
+
+.panel__subtitle {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 1;
+  padding-left: .26em;
+}
+
+.panel__right {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
 }
 
 .panel__stat {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 3px;
   min-width: 0;
-  max-width: 240px;
+  max-width: 200px;
 }
 
 .panel__stat-label {
@@ -90,6 +122,6 @@ defineProps<{
 }
 
 .panel__body {
-  padding: 20px;
+  padding: 18px;
 }
 </style>

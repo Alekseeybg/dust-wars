@@ -1,35 +1,56 @@
 <script setup lang="ts">
-const model = defineModel<number>({ required: true })
+const model = defineModel<number>({ required: true });
 const props = withDefaults(defineProps<{ min?: number; max?: number }>(), {
   min: 1,
   max: 9999,
-})
+});
 
 function clamp(value: number): number {
-  return Math.max(props.min, Math.min(props.max, value))
+  return Math.max(props.min, Math.min(props.max, value));
 }
 
 function decrement() {
-  model.value = clamp(model.value - 1)
+  model.value = clamp(model.value - 1);
 }
 
 function increment() {
-  model.value = clamp(model.value + 1)
+  model.value = clamp(model.value + 1);
 }
 
 function onInput(event: Event) {
-  const raw = Number((event.target as HTMLInputElement).value)
-  model.value = clamp(Number.isFinite(raw) ? Math.floor(raw) : props.min)
+  const raw = Number((event.target as HTMLInputElement).value);
+  model.value = clamp(Number.isFinite(raw) ? Math.floor(raw) : props.min);
 }
 </script>
 
 <template>
   <div class="qty">
-    <button class="qty__btn" type="button" :disabled="model <= min" aria-label="Decrease quantity"
-      @click="decrement">−</button>
-    <input class="qty__input mono" type="number" :value="model" :min="min" :max="max" @input="onInput" />
-    <button class="qty__btn" type="button" :disabled="model >= max" aria-label="Increase quantity"
-      @click="increment">+</button>
+    <button
+      class="qty__btn"
+      type="button"
+      :disabled="model <= min"
+      aria-label="Decrease quantity"
+      @click="decrement"
+    >
+      −
+    </button>
+    <input
+      class="qty__input mono"
+      type="number"
+      :value="model"
+      :min="min"
+      :max="max"
+      @input="onInput"
+    />
+    <button
+      class="qty__btn"
+      type="button"
+      :disabled="model >= max"
+      aria-label="Increase quantity"
+      @click="increment"
+    >
+      +
+    </button>
   </div>
 </template>
 
@@ -38,18 +59,20 @@ function onInput(event: Event) {
   display: inline-flex;
   align-items: stretch;
   height: 32px;
-  background: rgba(0, 0, 0, .28);
-  border: 1px solid rgba(255, 255, 255, .05);
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 6px;
   overflow: hidden;
-  transition: background 140ms ease, border-color 140ms ease;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease;
 }
 
 /* Whole group responds to any focus inside it — a soft gold rim replaces
    the browser's default outline. */
 .qty:focus-within {
-  background: rgba(0, 0, 0, .38);
-  border-color: rgba(184, 137, 63, .28);
+  background: rgba(0, 0, 0, 0.38);
+  border-color: rgba(184, 137, 63, 0.28);
 }
 
 .qty__btn {
@@ -65,17 +88,19 @@ function onInput(event: Event) {
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: color 120ms ease, background 120ms ease;
+  transition:
+    color 120ms ease,
+    background 120ms ease;
 }
 
 .qty__btn:hover:not(:disabled) {
   color: var(--gold-soft);
-  background: rgba(184, 137, 63, .10);
+  background: rgba(184, 137, 63, 0.1);
 }
 
 .qty__btn:active:not(:disabled) {
   color: var(--gold-soft);
-  background: rgba(184, 137, 63, .18);
+  background: rgba(184, 137, 63, 0.18);
 }
 
 .qty__btn:focus {
@@ -85,7 +110,7 @@ function onInput(event: Event) {
 .qty__btn:focus-visible {
   outline: none;
   color: var(--gold-soft);
-  background: rgba(184, 137, 63, .14);
+  background: rgba(184, 137, 63, 0.14);
 }
 
 .qty__btn:disabled {
@@ -102,8 +127,8 @@ function onInput(event: Event) {
   color: var(--text);
   background: transparent;
   border: none;
-  border-left: 1px solid rgba(255, 255, 255, .05);
-  border-right: 1px solid rgba(255, 255, 255, .05);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
   appearance: textfield;
   -moz-appearance: textfield;
 }
@@ -121,6 +146,6 @@ function onInput(event: Event) {
   outline: none;
   outline-offset: 0;
   color: var(--gold-soft);
-  background: rgba(184, 137, 63, .08);
+  background: rgba(184, 137, 63, 0.08);
 }
 </style>

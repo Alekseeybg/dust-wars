@@ -1,0 +1,115 @@
+/**
+ * Shared dialog chrome. Sizes are per-dialog-type via modifier classes.
+ * The __body element receives .dust-scroll for the custom scrollbar.
+ */
+
+.dust-dialog {
+  display: flex;
+  flex-direction: column;
+  max-width: 94vw;
+
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0) 40%), #0a0a0c;
+  border: 1px solid rgba(184, 137, 63, 0.18);
+  border-radius: 10px;
+  box-shadow:
+    0 30px 80px -20px rgba(0, 0, 0, 0.95),
+    0 8px 24px -10px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+
+/* ---- size variants --------------------------------------------- */
+
+/* Cargo: sized for 5 groups of 1 lot each; body height fixed at 600. */
+.dust-dialog--cargo {
+  width: 540px;
+  --dust-dialog-body-max: 600px;
+}
+
+/* Log: text column ~858px, sized for 12 entries. */
+.q-dialog__inner--minimized > div {
+  max-width: none !important;
+}
+
+.dust-dialog--log {
+  width: 980;
+  --dust-dialog-body-max: 560px;
+}
+
+/* ---- head ------------------------------------------------------- */
+
+.dust-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--stroke);
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.dust-dialog__titles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dust-dialog__title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+  line-height: 1.2;
+  padding-left: 0.28em;
+}
+
+.dust-dialog__sub {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-left: 0.28em;
+}
+
+.dust-dialog__close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    color 120ms ease,
+    background 120ms ease,
+    border-color 120ms ease;
+}
+.dust-dialog__close:hover {
+  color: var(--gold-soft);
+  background: rgba(184, 137, 63, 0.08);
+  border-color: rgba(184, 137, 63, 0.18);
+}
+
+/* ---- body ------------------------------------------------------- */
+
+.dust-dialog__body {
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-height: var(--dust-dialog-body-max, 400px);
+}
+
+.dust-dialog__empty {
+  padding: 40px 0;
+  text-align: center;
+  font-size: var(--fs-md);
+  color: var(--muted-2);
+}

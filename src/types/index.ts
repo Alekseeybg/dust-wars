@@ -1,10 +1,5 @@
 // -----------------------------------------------------------------------------
 // Domain type definitions.
-//
-// Literal unions for IDs (rather than plain `string`) so that every
-// Record<DrugId, ...> / Record<CityId, ...> is exhaustively checked at
-// compile time. Missing a drug in the data file becomes a red error
-// instead of a silent undefined.
 // -----------------------------------------------------------------------------
 
 export type DrugId =
@@ -31,10 +26,10 @@ export interface Drug {
   id: DrugId;
   name: string;
   tier: DrugTier;
-  base: number; // neutral-market reference price, $/gram
-  vol: number; // 0..1 — price volatility spread
-  swatch: string; // dim identifier colour
-  description: string; // one-line player-facing blurb, shown in tooltip
+  base: number;
+  vol: number;
+  swatch: string;
+  description: string;
 }
 
 export interface City {
@@ -56,13 +51,47 @@ export interface Car {
 }
 
 // -----------------------------------------------------------------------------
+// Cargo
+// -----------------------------------------------------------------------------
+
+/**
+ * A single purchase batch. Sold under FIFO — the oldest lot is consumed
+ * first. `price` is per gram.
+ */
+export interface CargoLot {
+  qty: number;
+  price: number;
+  day: number;
+}
+
+// -----------------------------------------------------------------------------
+// Log
+// -----------------------------------------------------------------------------
 
 export type LogKind = 'info' | 'good' | 'bad';
+
+export type LogColor =
+  | 'gold'
+  | 'gold-soft'
+  | 'forest'
+  | 'forest-soft'
+  | 'wine'
+  | 'wine-soft'
+  | 'violet'
+  | 'text'
+  | 'muted'
+  | 'muted-2';
+
+export interface LogSegment {
+  text: string;
+  bold?: boolean;
+  color?: LogColor;
+}
 
 export interface LogEntry {
   day: number;
   kind: LogKind;
-  text: string;
+  segments: LogSegment[];
 }
 
 // -----------------------------------------------------------------------------
@@ -79,6 +108,14 @@ export interface MarketPrices {
   prices: Record<DrugId, number>;
   trends: Record<DrugId, PriceTrend>;
 }
+
+export interface PricePoint {
+  day: number;
+  epoch: number;
+  price: number;
+}
+
+export type MarketHistory = Partial<Record<CityId, Partial<Record<DrugId, PricePoint[]>>>>;
 
 // -----------------------------------------------------------------------------
 // Game state
@@ -104,7 +141,14 @@ export interface GameState {
   cityId: CityId;
   carId: CarId;
   heat: number;
-  cargo: Partial<Record<DrugId, number>>;
+
+  /**
+   * Purchase lots per drug, oldest first. Quantity held and cost basis
+   * are both derived from this — there is no separate cargo/cargoCost
+   * map, by design.
+   */
+  cargoLots: Partial<Record<DrugId, CargoLot[]>>;
+
   capacity: number;
   log: LogEntry[];
 
@@ -114,6 +158,7 @@ export interface GameState {
 
   supply: SupplyState;
   market: MarketPrices | null;
+  marketHistory: MarketHistory;
 }
 
 export type TradeResult = { ok: true } | { ok: false; reason: string };

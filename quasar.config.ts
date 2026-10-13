@@ -103,7 +103,7 @@ export default defineConfig((/* ctx */) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
     framework: {
-      plugins: ['Notify'],
+      plugins: ['Notify', 'Dialog'],
       config: {
         dark: true,
         notify: {

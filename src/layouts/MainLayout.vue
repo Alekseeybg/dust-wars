@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import TopBar from 'components/TopBar.vue';
-import CargoHold from 'components/CargoHold.vue';
-import StreetLog from 'components/StreetLog.vue';
+import TopBar from 'components/TopBar.vue'
+import CargoHold from 'components/CargoHold.vue'
+import ProfileBox from 'components/ProfileBox.vue'
+import ActionsBox from 'components/ActionsBox.vue'
+import DebugPanel from 'components/DebugPanel.vue'
 </script>
 
 <template>
@@ -15,7 +17,9 @@ import StreetLog from 'components/StreetLog.vue';
         </main>
         <aside class="shell__sidebar">
           <CargoHold />
-          <StreetLog />
+          <ProfileBox />
+          <ActionsBox />
+          <DebugPanel />
         </aside>
       </div>
     </q-page-container>
@@ -25,30 +29,34 @@ import StreetLog from 'components/StreetLog.vue';
 <style lang="scss" scoped>
 .shell {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
-  gap: var(--sp-4);
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px;
   align-items: start;
   max-width: 1500px;
   margin: 0 auto;
-  padding: var(--sp-5);
+  padding: 20px;
 }
 
 .shell__main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   min-width: 0;
 }
 
 .shell__sidebar {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-4);
+  gap: 16px;
   position: sticky;
-  top: 84px;
+  top: 96px;
 }
 
 @media (max-width: 1040px) {
   .shell {
     grid-template-columns: minmax(0, 1fr);
   }
+
   .shell__sidebar {
     position: static;
   }

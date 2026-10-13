@@ -1,0 +1,45 @@
+/**
+ * Custom scrollbar. Applies to any element with .dust-scroll.
+ *
+ * Only ::-webkit-scrollbar pseudo-elements are used. Do NOT add
+ * `scrollbar-width` or `scrollbar-color` here — Chromium 121+ treats
+ * those as authoritative and ignores the WebKit rules entirely, which
+ * is what broke hover styling previously. Firefox falls back to its
+ * native scrollbar; acceptable tradeoff.
+ */
+
+.dust-scroll {
+  overflow-y: auto;
+}
+
+.dust-scroll::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+.dust-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dust-scroll::-webkit-scrollbar-thumb {
+  background: rgba(184, 137, 63, 0.28);
+  border-radius: 8px;
+  /* transparent border inset — the thumb reads as a floating rail,
+     not a bar glued to the dialog edge */
+  border: 4px solid transparent;
+  background-clip: padding-box;
+}
+
+.dust-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(184, 137, 63, 0.58);
+  background-clip: padding-box;
+}
+
+.dust-scroll::-webkit-scrollbar-thumb:active {
+  background: rgba(184, 137, 63, 0.78);
+  background-clip: padding-box;
+}
+
+.dust-scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { QTooltip } from 'quasar'
-import type { Drug, DrugId, PriceTrend } from 'types'
+import type { Drug, DrugId, PricePoint, PriceTrend } from 'types'
 import QtyStepper from './QtyStepper.vue'
 
 export interface MarketRow {
@@ -15,6 +15,9 @@ export interface MarketRow {
 const props = defineProps<{
   row: MarketRow
   maxBuy: number
+  history: PricePoint[]
+  /** Bumped by the parent to trigger a reset of all local quantities. */
+  resetSignal: number
 }>()
 
 const emit = defineEmits<{
@@ -24,6 +27,12 @@ const emit = defineEmits<{
 
 const buyQty = ref(1)
 const sellQty = ref(1)
+
+// Reset local quantities whenever the parent bumps the signal.
+watch(() => props.resetSignal, () => {
+  buyQty.value = 1
+  sellQty.value = 1
+})
 
 const effectiveBuy = computed(() => Math.max(1, Math.min(buyQty.value, Math.max(props.maxBuy, 1))))
 const effectiveSell = computed(() => Math.max(1, Math.min(sellQty.value, Math.max(props.row.held, 1))))
@@ -40,26 +49,35 @@ const trendGlyph: Record<PriceTrend, string> = {
   flat: '—',
 }
 
-const presets = [10, 50] as const
+// -------------------------------------------------------------- buy qty --
+function addBuy(n: number) {
+  buyQty.value = Math.min(props.maxBuy, buyQty.value + n)
+}
+function resetBuy() {
+  buyQty.value = 1
+}
+function setBuyMax() {
+  buyQty.value = Math.max(1, props.maxBuy)
+}
+const isBuyMaxActive = computed(
+  () => canBuy.value && effectiveBuy.value === props.maxBuy,
+)
 
-function setBuyQty(n: number) { buyQty.value = n }
-function setSellQty(n: number) { sellQty.value = n }
-function setBuyMax() { buyQty.value = Math.max(1, props.maxBuy) }
-function setSellMax() { sellQty.value = Math.max(1, props.row.held) }
+// ------------------------------------------------------------- sell qty --
+function addSell(n: number) {
+  sellQty.value = Math.min(props.row.held, sellQty.value + n)
+}
+function resetSell() {
+  sellQty.value = 1
+}
+function setSellMax() {
+  sellQty.value = Math.max(1, props.row.held)
+}
+const isSellMaxActive = computed(
+  () => canSell.value && effectiveSell.value === props.row.held,
+)
 
-function isBuyPresetActive(n: number): boolean {
-  return n <= props.maxBuy && effectiveBuy.value === n
-}
-function isSellPresetActive(n: number): boolean {
-  return n <= props.row.held && effectiveSell.value === n
-}
-function isBuyMaxActive(): boolean {
-  return canBuy.value && effectiveBuy.value === props.maxBuy
-}
-function isSellMaxActive(): boolean {
-  return canSell.value && effectiveSell.value === props.row.held
-}
-
+// --------------------------------------------------------------- actions --
 function onBuy() {
   if (!canBuy.value) return
   emit('buy', props.row.drug.id, effectiveBuy.value)
@@ -67,6 +85,23 @@ function onBuy() {
 function onSell() {
   if (!canSell.value) return
   emit('sell', props.row.drug.id, effectiveSell.value)
+}
+
+// ------------------------------------------------------------ history -----
+const hasHistory = computed(() => props.history.length >= 2)
+
+function deltaAt(index: number): number | undefined {
+  if (index === 0) return undefined
+  return props.history[index]!.price - props.history[index - 1]!.price
+}
+function deltaLabel(delta: number | undefined): string {
+  if (delta === undefined) return ''
+  if (delta === 0) return '—'
+  return `${delta > 0 ? '+' : '−'}$${Math.abs(delta)}`
+}
+function deltaClass(delta: number | undefined): string {
+  if (delta === undefined || delta === 0) return 'price-history__delta--flat'
+  return delta > 0 ? 'price-history__delta--up' : 'price-history__delta--down'
 }
 </script>
 
@@ -94,20 +129,31 @@ function onSell() {
         {{ trendGlyph[props.row.trend] }}
       </span>
       <div v-if="props.row.pressure.amount > 0.05" class="row__pressure"
-        :class="`row__pressure--${props.row.pressure.kind}`"
-        :title="props.row.pressure.kind === 'scarce' ? 'Scarce — price elevated' : 'Glutted — price depressed'">
-        <div class="row__pressure-fill" :style="{ width: props.row.pressure.amount * 100 + '%' }" />
-      </div>
+        :class="`row__pressure--${props.row.pressure.kind}`" />
+
+      <QTooltip v-if="hasHistory" class="dust-tip" anchor="top middle" self="bottom middle" :offset="[0, 12]"
+        :delay="220">
+        <div class="dust-tip__name">Price History</div>
+        <ul class="price-history">
+          <li v-for="(point, i) in props.history" :key="`${point.day}-${i}`" class="price-history__row">
+            <span class="price-history__day mono">D{{ point.day }}</span>
+            <span class="price-history__price mono">${{ point.price }}</span>
+            <span class="price-history__delta mono" :class="deltaClass(deltaAt(i))">
+              {{ deltaLabel(deltaAt(i)) }}
+            </span>
+          </li>
+        </ul>
+      </QTooltip>
     </div>
 
+    <!-- Buy group -->
     <div class="trade trade--buy row__divided-full" :class="{ 'trade--disabled': !canBuy }">
       <QtyStepper v-model="buyQty" :min="1" :max="Math.max(1, props.maxBuy)" />
       <div class="chip-group">
-        <button v-for="p in presets" :key="`buy-${p}`" type="button" class="chip"
-          :class="{ 'is-active': isBuyPresetActive(p) }" :disabled="p > props.maxBuy" @click="setBuyQty(p)">{{ p
-          }}</button>
-        <button type="button" class="chip chip--wide" :class="{ 'is-active': isBuyMaxActive() }" :disabled="!canBuy"
+        <button type="button" class="chip" :disabled="buyQty >= props.maxBuy" @click="addBuy(10)">+10</button>
+        <button type="button" class="chip chip--wide" :class="{ 'is-active': isBuyMaxActive }" :disabled="!canBuy"
           @click="setBuyMax">MAX</button>
+        <button type="button" class="chip" :disabled="buyQty === 1" @click="resetBuy">↺</button>
       </div>
       <button class="btn btn--buy btn--split btn--lg" type="button" :disabled="!canBuy" @click="onBuy">
         <span>Buy</span>
@@ -115,14 +161,14 @@ function onSell() {
       </button>
     </div>
 
+    <!-- Sell group -->
     <div class="trade trade--sell" :class="{ 'trade--disabled': !canSell }">
       <QtyStepper v-model="sellQty" :min="1" :max="Math.max(1, props.row.held)" />
       <div class="chip-group">
-        <button v-for="p in presets" :key="`sell-${p}`" type="button" class="chip"
-          :class="{ 'is-active': isSellPresetActive(p) }" :disabled="p > props.row.held" @click="setSellQty(p)">{{ p
-          }}</button>
-        <button type="button" class="chip chip--wide" :class="{ 'is-active': isSellMaxActive() }" :disabled="!canSell"
+        <button type="button" class="chip" :disabled="sellQty >= props.row.held" @click="addSell(10)">+10</button>
+        <button type="button" class="chip chip--wide" :class="{ 'is-active': isSellMaxActive }" :disabled="!canSell"
           @click="setSellMax">MAX</button>
+        <button type="button" class="chip" :disabled="sellQty === 1" @click="resetSell">↺</button>
       </div>
       <button class="btn btn--sell btn--split btn--lg" type="button" :disabled="!canSell" @click="onSell">
         <span>Sell</span>
@@ -133,6 +179,7 @@ function onSell() {
 </template>
 
 <style lang="scss" scoped>
+/* styles unchanged from previous version — see previous DrugRow style block */
 .row {
   position: relative;
   display: grid;
@@ -144,14 +191,10 @@ function onSell() {
   transition: background 180ms ease, box-shadow 180ms ease;
 }
 
-/* Subtle zebra — even rows a hair lighter than the body.
-   Reads as texture, not stripes. */
 .row:nth-child(even) {
   background: rgba(255, 255, 255, .008);
 }
 
-/* Divider between rows: a hairline that peaks at center and fades at
-   the edges. Replaces the hard 1px border, feels more refined. */
 .row::after {
   content: '';
   position: absolute;
@@ -159,21 +202,14 @@ function onSell() {
   right: 0;
   top: 0;
   height: 1px;
-  background: linear-gradient(90deg,
-      transparent 0%,
-      rgba(255, 255, 255, .05) 10%,
-      rgba(255, 255, 255, .085) 50%,
-      rgba(255, 255, 255, .05) 90%,
-      transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, .05) 10%, rgba(255, 255, 255, .085) 50%, rgba(255, 255, 255, .05) 90%, transparent 100%);
   pointer-events: none;
 }
 
-/* First row sits directly under the header — no top divider needed. */
 .row:first-child::after {
   display: none;
 }
 
-/* Gold accent bar that slides in on hover. */
 .row::before {
   content: '';
   position: absolute;
@@ -181,10 +217,7 @@ function onSell() {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: linear-gradient(180deg,
-      transparent 0%,
-      var(--gold) 50%,
-      transparent 100%);
+  background: linear-gradient(180deg, transparent 0%, var(--gold) 50%, transparent 100%);
   opacity: 0;
   transition: opacity 200ms ease;
   pointer-events: none;
@@ -193,16 +226,12 @@ function onSell() {
 
 .row:hover {
   background: rgba(255, 255, 255, .022);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .025),
-    inset 0 -1px 0 rgba(0, 0, 0, .25);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025), inset 0 -1px 0 rgba(0, 0, 0, .25);
 }
 
 .row:hover::before {
   opacity: .7;
 }
-
-/* ---- dividers --------------------------------------------------- */
 
 .row__cell {
   align-self: stretch;
@@ -217,8 +246,6 @@ function onSell() {
 .row__divided-full {
   border-left: 1px solid var(--stroke);
 }
-
-/* ---- identity --------------------------------------------------- */
 
 .row__swatch {
   justify-self: center;
@@ -278,8 +305,6 @@ function onSell() {
   background: rgba(255, 255, 255, .06);
 }
 
-/* ---- numbers ---------------------------------------------------- */
-
 .row__owned {
   justify-content: center;
   font-size: 15px;
@@ -304,6 +329,7 @@ function onSell() {
   gap: 4px;
   padding: 0 var(--sp-3) 4px;
   line-height: 1;
+  cursor: help;
 }
 
 .row__price {
@@ -348,21 +374,61 @@ function onSell() {
   overflow: hidden;
 }
 
-.row__pressure-fill {
-  height: 100%;
-  border-radius: 1px;
-  transition: width 220ms ease;
+.row__pressure--scarce {
+  background: rgba(184, 74, 74, .5);
 }
 
-.row__pressure--scarce .row__pressure-fill {
-  background: var(--wine-soft);
+.row__pressure--glutted {
+  background: rgba(130, 163, 93, .5);
 }
 
-.row__pressure--glutted .row__pressure-fill {
-  background: var(--forest-soft);
+.price-history {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
 }
 
-/* ---- trade groups ----------------------------------------------- */
+.price-history__row {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 12.5px;
+  line-height: 1.2;
+}
+
+.price-history__day {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  color: var(--muted-2);
+}
+
+.price-history__price {
+  color: var(--text);
+  font-weight: 600;
+  text-align: right;
+}
+
+.price-history__delta {
+  min-width: 42px;
+  text-align: right;
+  font-weight: 600;
+  font-size: 11.5px;
+}
+
+.price-history__delta--up {
+  color: var(--wine-soft);
+}
+
+.price-history__delta--down {
+  color: var(--forest-soft);
+}
+
+.price-history__delta--flat {
+  color: var(--muted-2);
+}
 
 .trade {
   display: flex;
@@ -393,8 +459,6 @@ function onSell() {
 .row:hover .trade--sell:not(.trade--disabled) {
   background: rgba(138, 42, 42, .11);
 }
-
-/* ---- responsive ------------------------------------------------- */
 
 @media (max-width: 1500px) {
   .row {

@@ -1,16 +1,23 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { Notify } from 'quasar'
 import { useGameStore } from 'stores/game'
 import { DRUGS } from 'data/drugs'
 import { supplyAt, supplyPressure } from 'domain/pricing'
-import type { DrugId } from 'types'
+import type { DrugId, PricePoint } from 'types'
 import Panel from 'components/Panel.vue'
+import StreetLog from 'components/StreetLog.vue'
 import DrugRow, { type MarketRow } from 'components/market/DrugRow.vue'
 
 const game = useGameStore()
-const { market, supply, cargo, cash, capacity } = storeToRefs(game)
+const { market, supply, city, cash, capacity } = storeToRefs(game)
+
+/** Bumping this causes every row to reset its local quantities to 1. */
+const resetSignal = ref(0)
+function resetAllQuantities() {
+  resetSignal.value += 1
+}
 
 const freeSpace = computed(() => capacity.value - game.cargoUsed)
 
@@ -22,11 +29,15 @@ const rows = computed<MarketRow[]>(() => {
       drug,
       price: market.value!.prices[drug.id],
       trend: market.value!.trends[drug.id],
-      held: cargo.value[drug.id] ?? 0,
+      held: game.heldQty(drug.id),
       pressure: supplyPressure(supplyLevel),
     }
   })
 })
+
+function historyFor(drugId: DrugId): PricePoint[] {
+  return game.marketHistory[game.cityId]?.[drugId] ?? []
+}
 
 function maxBuyFor(price: number): number {
   const byCash = Math.floor(cash.value / price)
@@ -44,28 +55,66 @@ function onSell(drugId: DrugId, qty: number) {
 </script>
 
 <template>
-  <Panel title="Market">
-    <div v-if="!market" class="empty">Market data unavailable.</div>
+  <div class="market-page">
+    <Panel title="Market" :subtitle="city.name">
+      <template #action>
+        <button class="reset-all" type="button" @click="resetAllQuantities">
+          Reset Qty
+        </button>
+      </template>
 
-    <div v-else class="drugs">
-      <div class="drugs__head">
-        <span />
-        <span class="drugs__head-cell">Drug</span>
-        <span class="drugs__head-cell drugs__head-cell--divided">Owned</span>
-        <span class="drugs__head-cell drugs__head-cell--divided">Price</span>
-        <span class="drugs__head-cell drugs__head-cell--divided">Buy</span>
-        <span class="drugs__head-cell">Sell</span>
-      </div>
+      <div v-if="!market" class="empty">Market data unavailable.</div>
 
-      <div class="drugs__body">
-        <DrugRow v-for="row in rows" :key="row.drug.id" :row="row" :max-buy="maxBuyFor(row.price)" @buy="onBuy"
-          @sell="onSell" />
+      <div v-else class="drugs">
+        <div class="drugs__head">
+          <span />
+          <span class="drugs__head-cell">Drug</span>
+          <span class="drugs__head-cell drugs__head-cell--divided">Owned</span>
+          <span class="drugs__head-cell drugs__head-cell--divided">Price</span>
+          <span class="drugs__head-cell drugs__head-cell--divided">Buy</span>
+          <span class="drugs__head-cell">Sell</span>
+        </div>
+
+        <div class="drugs__body">
+          <DrugRow v-for="row in rows" :key="row.drug.id" :row="row" :max-buy="maxBuyFor(row.price)"
+            :history="historyFor(row.drug.id)" :reset-signal="resetSignal" @buy="onBuy" @sell="onSell" />
+        </div>
       </div>
-    </div>
-  </Panel>
+    </Panel>
+
+    <StreetLog />
+  </div>
 </template>
 
 <style lang="scss" scoped>
+.market-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reset-all {
+  padding: 4px 8px;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+  white-space: nowrap;
+}
+
+.reset-all:hover {
+  color: var(--gold-soft);
+  background: rgba(184, 137, 63, .08);
+  border-color: rgba(184, 137, 63, .18);
+}
+
 .drugs {
   --cols: 24px minmax(110px, 1fr) 76px 96px 340px 340px;
   margin: 0 calc(var(--sp-5) * -1);
@@ -73,31 +122,22 @@ function onSell(drugId: DrugId, qty: number) {
   margin-bottom: calc(var(--sp-5) * -1);
 }
 
-/* ---- header band --------------------------------------------------
-   Very dark, recessed plate — noticeably darker than the panel body
-   below it. Gold hairline across the top, strong bottom shadow that
-   lifts it above the row stack. */
-
 .drugs__head {
   position: relative;
   z-index: 2;
-
   display: grid;
   grid-template-columns: var(--cols);
   column-gap: 0;
   align-items: stretch;
   min-height: 46px;
-
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .20em;
   text-transform: uppercase;
   color: #b5a795;
-
   background:
     linear-gradient(180deg, rgba(255, 255, 255, .025) 0%, rgba(255, 255, 255, 0) 60%),
     #050507;
-
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, .05),
     inset 0 -1px 0 rgba(0, 0, 0, .65),
@@ -105,7 +145,6 @@ function onSell(drugId: DrugId, qty: number) {
     0 5px 10px -4px rgba(0, 0, 0, .6);
 }
 
-/* Gold hairline at the very top of the header band. */
 .drugs__head::before {
   content: '';
   position: absolute;
@@ -113,16 +152,10 @@ function onSell(drugId: DrugId, qty: number) {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg,
-      transparent 0%,
-      rgba(184, 137, 63, .25) 12%,
-      rgba(184, 137, 63, .70) 50%,
-      rgba(184, 137, 63, .25) 88%,
-      transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(184, 137, 63, .25) 12%, rgba(184, 137, 63, .70) 50%, rgba(184, 137, 63, .25) 88%, transparent 100%);
   pointer-events: none;
 }
 
-/* Soft gold aura bleeding onto the first row. */
 .drugs__head::after {
   content: '';
   position: absolute;
@@ -144,10 +177,6 @@ function onSell(drugId: DrugId, qty: number) {
 .drugs__head-cell--divided {
   border-left: 1px solid rgba(255, 255, 255, .04);
 }
-
-/* ---- body ---------------------------------------------------------
-   Slightly lighter than the panel and header — the row surface reads
-   as a raised, illuminated "screen" beneath the darker band. */
 
 .drugs__body {
   position: relative;

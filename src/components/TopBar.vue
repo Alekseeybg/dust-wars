@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useGameStore, LIMITS } from 'stores/game'
-import { money } from 'utils/format'
-import HeatMeter from './HeatMeter.vue'
+import { computed } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useGameStore, LIMITS } from 'stores/game';
+import { money } from 'utils/format';
+import HeatMeter from './HeatMeter.vue';
 
-const game = useGameStore()
-const { cash, debt, day, heat, city } = storeToRefs(game)
+const game = useGameStore();
+const { cash, debt, day, heat, city } = storeToRefs(game);
 
-const cashStr = computed(() => money(cash.value))
-const debtStr = computed(() => money(debt.value))
+const cashStr = computed(() => money(cash.value));
+const debtStr = computed(() => money(debt.value));
 </script>
 
 <template>
@@ -18,7 +18,12 @@ const debtStr = computed(() => money(debt.value))
       <router-link to="/market" class="brand" aria-label="Dust Wars — home">
         <span class="brand__mark" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="24" height="24">
-            <path d="M12 2.5 L21.5 12 L12 21.5 L2.5 12 Z" fill="none" stroke="currentColor" stroke-width="1.4" />
+            <path
+              d="M12 2.5 L21.5 12 L12 21.5 L2.5 12 Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.4"
+            />
             <path d="M12 7.5 L16.5 12 L12 16.5 L7.5 12 Z" fill="currentColor" opacity="0.5" />
           </svg>
         </span>
@@ -61,6 +66,10 @@ const debtStr = computed(() => money(debt.value))
 
         <HeatMeter :level="heat" :max="LIMITS.HEAT_MAX" />
       </div>
+
+      <!-- Right column kept empty for now; reserved for global nav
+           (Travel / Bank / Settings) in a later pass. -->
+      <span class="topbar__spacer" aria-hidden="true" />
     </div>
   </q-header>
 </template>
@@ -71,28 +80,26 @@ const debtStr = computed(() => money(debt.value))
   top: 0;
   z-index: 10;
   background:
-    /* warm light source behind the brand, bleeding rightward */
-    radial-gradient(720px 140% at 0% 50%,
-      rgba(184, 137, 63, .10) 0%,
-      rgba(184, 137, 63, .04) 35%,
-      transparent 72%),
-    /* faint warm counterpoint from the far right edge */
-    radial-gradient(380px 100% at 100% 50%,
-      rgba(184, 137, 63, .035) 0%,
-      transparent 70%),
-    /* base vertical gradient — slightly warmer at top */
-    linear-gradient(180deg,
-      rgba(20, 17, 13, .96) 0%,
-      rgba(11, 10, 9, .98) 55%,
-      rgba(6, 6, 8, 1) 100%);
+    radial-gradient(
+      720px 140% at 0% 50%,
+      rgba(184, 137, 63, 0.1) 0%,
+      rgba(184, 137, 63, 0.04) 35%,
+      transparent 72%
+    ),
+    radial-gradient(380px 100% at 100% 50%, rgba(184, 137, 63, 0.035) 0%, transparent 70%),
+    linear-gradient(
+      180deg,
+      rgba(20, 17, 13, 0.96) 0%,
+      rgba(11, 10, 9, 0.98) 55%,
+      rgba(6, 6, 8, 1) 100%
+    );
   backdrop-filter: blur(16px) saturate(1.2);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .035),
-    0 1px 0 rgba(0, 0, 0, .55);
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 1px 0 rgba(0, 0, 0, 0.55);
 }
 
-/* Gold hairline along the bottom, brightest at the brand side. */
 .topbar::after {
   content: '';
   position: absolute;
@@ -100,26 +107,28 @@ const debtStr = computed(() => money(debt.value))
   right: 0;
   bottom: 0;
   height: 1px;
-  background: linear-gradient(90deg,
-      rgba(184, 137, 63, .55) 0%,
-      rgba(184, 137, 63, .22) 18%,
-      rgba(184, 137, 63, .06) 45%,
-      transparent 70%);
+  background: linear-gradient(
+    90deg,
+    rgba(184, 137, 63, 0.55) 0%,
+    rgba(184, 137, 63, 0.22) 18%,
+    rgba(184, 137, 63, 0.06) 45%,
+    transparent 70%
+  );
   pointer-events: none;
 }
 
+/* Three-column grid: brand | stats | spacer. The stats occupy the
+   center column, so they land at the true center of the bar. */
 .topbar__inner {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  /* brand cluster, then stats cluster with a fixed comfortable gap;
-     no auto-margin — everything sits toward the left of the bar. */
-  gap: 64px;
+  gap: 24px;
   padding: 16px 32px;
 }
 
-/* ---- brand -------------------------------------------------------- */
-
 .brand {
+  justify-self: start;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -129,7 +138,7 @@ const debtStr = computed(() => money(debt.value))
 }
 
 .brand:hover {
-  opacity: .92;
+  opacity: 0.92;
 }
 
 .brand__mark {
@@ -137,12 +146,14 @@ const debtStr = computed(() => money(debt.value))
   align-items: center;
   justify-content: center;
   color: var(--gold);
-  transition: color 160ms ease, filter 160ms ease;
+  transition:
+    color 160ms ease,
+    filter 160ms ease;
 }
 
 .brand:hover .brand__mark {
   color: #e8bf76;
-  filter: drop-shadow(0 0 10px rgba(212, 168, 96, .38));
+  filter: drop-shadow(0 0 10px rgba(212, 168, 96, 0.38));
 }
 
 .brand__text {
@@ -154,7 +165,7 @@ const debtStr = computed(() => money(debt.value))
 .brand__name {
   font-size: 16px;
   font-weight: 600;
-  letter-spacing: .30em;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--gold-soft);
   line-height: 1.15;
@@ -164,18 +175,21 @@ const debtStr = computed(() => money(debt.value))
   margin-top: 3px;
   font-size: 9px;
   font-weight: 500;
-  letter-spacing: .30em;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--muted-2);
   line-height: 1;
 }
 
-/* ---- stats cluster ------------------------------------------------ */
-
 .topbar__stats {
+  justify-self: center;
   display: flex;
   align-items: center;
   gap: 32px;
+}
+
+.topbar__spacer {
+  justify-self: end;
 }
 
 .stat {
@@ -187,7 +201,7 @@ const debtStr = computed(() => money(debt.value))
 .stat__label {
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: .22em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--muted-2);
   line-height: 1;
@@ -218,22 +232,32 @@ const debtStr = computed(() => money(debt.value))
 .stat__sep {
   width: 1px;
   height: 26px;
-  background: linear-gradient(180deg,
-      transparent 0%,
-      rgba(255, 255, 255, .08) 25%,
-      rgba(255, 255, 255, .08) 75%,
-      transparent 100%);
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 25%,
+    rgba(255, 255, 255, 0.08) 75%,
+    transparent 100%
+  );
 }
 
 @media (max-width: 1100px) {
   .topbar__inner {
-    flex-wrap: wrap;
-    gap: 24px;
-    padding: 14px 20px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+  }
+
+  .brand,
+  .topbar__stats {
+    justify-self: center;
   }
 
   .topbar__stats {
     gap: 18px;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .stat__sep {
