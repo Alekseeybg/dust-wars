@@ -9,8 +9,13 @@ const pips = computed(() => Array.from({ length: props.max }, (_, i) => i < prop
 </script>
 
 <template>
-  <div class="stat">
-    <span class="stat__label">Heat</span>
+  <div class="heat">
+    <div class="heat__head" aria-hidden="true">
+      <span class="heat__label">Heat</span>
+      <span class="heat__value mono"
+        >{{ level }}<span> / {{ max }}</span></span
+      >
+    </div>
     <span
       class="meter"
       :class="{ 'meter--hot': hot }"
@@ -19,6 +24,7 @@ const pips = computed(() => Array.from({ length: props.max }, (_, i) => i < prop
       :aria-valuenow="level"
       aria-valuemin="0"
       :aria-valuemax="max"
+      :aria-valuetext="`${level} out of ${max}`"
     >
       <span v-for="(on, i) in pips" :key="i" class="meter__pip" :class="{ 'is-on': on }" />
     </span>
@@ -26,41 +32,72 @@ const pips = computed(() => Array.from({ length: props.max }, (_, i) => i < prop
 </template>
 
 <style lang="scss" scoped>
-.stat {
+.heat {
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+.heat__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
   gap: 6px;
 }
-.stat__label {
-  font-size: var(--fs-label);
-  font-weight: 500;
-  letter-spacing: 0.18em;
+.heat__label {
+  color: var(--header-muted, var(--muted));
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1;
   text-transform: uppercase;
-  color: var(--muted);
+}
+.heat__value {
+  color: var(--header-text, var(--text));
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+.heat__value span {
+  color: var(--header-muted, var(--muted));
+  font-size: 10px;
+  font-weight: 400;
 }
 .meter {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 3px;
-  height: 16px;
+  height: 12px;
 }
 .meter__pip {
-  width: 4px;
+  flex: 0 0 auto;
+  width: 6px;
   height: 10px;
-  border-radius: 1px;
-  background: var(--muted-2);
-  opacity: 0.28;
+  background: #222d38;
+  border: 1px solid rgba(166, 184, 200, 0.12);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
   transition:
     background var(--t-med),
-    opacity var(--t-med),
-    height var(--t-med);
+    border-color var(--t-med);
 }
 .meter__pip.is-on {
-  opacity: 1;
-  height: 16px;
-  background: var(--gold);
+  background: linear-gradient(180deg, #f1c773, #c58b32);
+  border-color: rgba(239, 179, 79, 0.65);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 .meter--hot .meter__pip.is-on {
-  background: var(--wine-soft);
+  background: var(--header-coral, #dc877a);
+  border-color: var(--header-coral, #dc877a);
+}
+@media (max-width: 600px) {
+  .heat__label {
+    font-size: 9px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .meter__pip {
+    transition: none;
+  }
 }
 </style>

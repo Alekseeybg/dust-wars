@@ -1,14 +1,17 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import TopBar from 'components/TopBar.vue';
 import CargoHold from 'components/CargoHold.vue';
 import ProfileBox from 'components/ProfileBox.vue';
 import ActionsBox from 'components/ActionsBox.vue';
 import DebugPanel from 'components/DebugPanel.vue';
+
+const headerHeight = ref(0);
 </script>
 
 <template>
-  <q-layout view="hHh lpR fFf">
-    <TopBar />
+  <q-layout view="hHh lpR fFf" :style="{ '--app-header-height': `${headerHeight}px` }">
+    <TopBar @resize="headerHeight = $event" />
 
     <q-page-container>
       <div class="shell">
@@ -49,7 +52,7 @@ import DebugPanel from 'components/DebugPanel.vue';
   flex-direction: column;
   gap: 16px;
   position: sticky;
-  top: 96px;
+  top: calc(var(--app-header-height, 0px) + 20px);
 }
 
 @media (max-width: 1040px) {
