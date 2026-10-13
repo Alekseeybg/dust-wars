@@ -10,21 +10,23 @@ defineProps<{
 <template>
   <section class="panel">
     <header class="panel__head">
-      <div class="panel__title-block">
-        <h2 class="panel__title">{{ title }}</h2>
-        <span v-if="subtitle" class="panel__subtitle">{{ subtitle }}</span>
-      </div>
+      <slot name="header">
+        <div class="panel__title-block">
+          <h2 class="panel__title">{{ title }}</h2>
+          <span v-if="subtitle" class="panel__subtitle">{{ subtitle }}</span>
+        </div>
 
-      <div class="panel__right">
-        <!-- If the parent supplies an action slot, it takes over the
-             right side. Otherwise, fall back to the meta stat display. -->
-        <slot name="action">
-          <div v-if="meta" class="panel__stat">
-            <span v-if="metaLabel" class="panel__stat-label">{{ metaLabel }}</span>
-            <span class="panel__stat-value">{{ meta }}</span>
-          </div>
-        </slot>
-      </div>
+        <div class="panel__right">
+          <!-- If the parent supplies an action slot, it takes over the
+               right side. Otherwise, fall back to the meta stat display. -->
+          <slot name="action">
+            <div v-if="meta" class="panel__stat">
+              <span v-if="metaLabel" class="panel__stat-label">{{ metaLabel }}</span>
+              <span class="panel__stat-value">{{ meta }}</span>
+            </div>
+          </slot>
+        </div>
+      </slot>
     </header>
     <div class="panel__body">
       <slot />

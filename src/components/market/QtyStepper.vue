@@ -62,10 +62,14 @@ function onInput(event: Event) {
 .qty {
   display: inline-flex;
   align-items: stretch;
-  height: 32px;
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
+  height: 34px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 58%), rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(214, 204, 184, 0.1);
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.32);
   overflow: hidden;
   transition:
     background 140ms ease,
@@ -76,11 +80,11 @@ function onInput(event: Event) {
    the browser's default outline. */
 .qty:focus-within {
   background: rgba(0, 0, 0, 0.38);
-  border-color: rgba(184, 137, 63, 0.28);
+  border-color: rgba(184, 137, 63, 0.38);
 }
 
 .qty__btn {
-  width: 30px;
+  width: 31px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -131,8 +135,8 @@ function onInput(event: Event) {
   color: var(--text);
   background: transparent;
   border: none;
-  border-left: 1px solid rgba(255, 255, 255, 0.05);
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-left: 1px solid rgba(214, 204, 184, 0.07);
+  border-right: 1px solid rgba(214, 204, 184, 0.07);
   appearance: textfield;
   -moz-appearance: textfield;
 }

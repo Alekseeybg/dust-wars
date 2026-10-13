@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { QTooltip } from 'quasar';
+import { computed, ref } from 'vue';
+import { QMenu, QTooltip } from 'quasar';
 import type { DrugId, PricePoint, PriceTrend } from 'types';
 import type { MarketRow } from './types';
 import TradeControls from './TradeControls.vue';
@@ -15,8 +15,29 @@ const emit = defineEmits<{
   buy: [drugId: DrugId, qty: number];
   sell: [drugId: DrugId, qty: number];
 }>();
-const trendGlyph: Record<PriceTrend, string> = { up: '▲', down: '▼', flat: '—' };
+const trendLabel: Record<PriceTrend, string> = {
+  up: 'Price is rising',
+  down: 'Price is falling',
+  flat: 'Price is holding steady',
+};
 const hasHistory = computed(() => props.history.length >= 2);
+const historyTrigger = ref<HTMLButtonElement>();
+const historyHeading = ref<HTMLDivElement>();
+
+function positionHistoryPointer() {
+  const trigger = historyTrigger.value;
+  const popup = historyHeading.value?.closest<HTMLElement>('.price-history-menu');
+  if (!trigger || !popup) return;
+
+  const anchor = trigger.getBoundingClientRect();
+  const bounds = popup.getBoundingClientRect();
+  const pointerX = Math.max(
+    16,
+    Math.min(bounds.width - 16, anchor.left + anchor.width / 2 - bounds.left),
+  );
+  popup.style.setProperty('--history-pointer-x', `${pointerX}px`);
+  popup.dataset.pointerSide = bounds.top < anchor.top ? 'bottom' : 'top';
+}
 const historyRows = computed(() =>
   props.history.map((point, index) => {
     const previous = props.history[index - 1];
@@ -63,42 +84,74 @@ const historyRows = computed(() =>
     </span>
 
     <div class="row__price-block row__cell row__divided">
-      <span class="row__price mono">${{ props.row.price }}</span>
-      <span class="row__trend" :class="`row__trend--${props.row.trend}`">
-        {{ trendGlyph[props.row.trend] }}
-      </span>
+      <div class="row__price-main">
+        <span class="row__price mono">${{ props.row.price }}</span>
+        <span
+          class="row__trend"
+          :class="`row__trend--${props.row.trend}`"
+          role="img"
+          :aria-label="trendLabel[props.row.trend]"
+        >
+          <svg v-if="props.row.trend === 'up'" viewBox="0 0 12 12" aria-hidden="true">
+            <path d="M6 1.25 10.5 5.75H7.5V11h-3V5.75H1.5L6 1.25Z" />
+          </svg>
+          <svg v-else-if="props.row.trend === 'down'" viewBox="0 0 12 12" aria-hidden="true">
+            <path d="m6 10.75-4.5-4.5h3V1h3v5.25h3l-4.5 4.5Z" />
+          </svg>
+          <svg v-else viewBox="0 0 12 12" aria-hidden="true">
+            <path d="M1.25 4.5h9.5v3h-9.5z" />
+          </svg>
+        </span>
+
+        <button
+          ref="historyTrigger"
+          class="row__history-trigger"
+          type="button"
+          :disabled="!hasHistory"
+          :aria-label="
+            hasHistory ? 'View price history' : 'Price history will appear after the market changes'
+          "
+          :title="
+            hasHistory ? 'View price history' : 'Price history will appear after the market changes'
+          "
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="m9.15 1.5-5.3 6.1h3.4L6.85 14.5l5.3-6.1h-3.4l.4-6.9Z" />
+          </svg>
+
+          <QMenu
+            v-if="hasHistory"
+            class="price-history-menu"
+            anchor="bottom middle"
+            self="top middle"
+            :offset="[0, 10]"
+            @show="positionHistoryPointer"
+          >
+            <div ref="historyHeading" class="price-history-menu__head">Price History</div>
+            <ul class="price-history">
+              <li
+                v-for="(point, i) in historyRows"
+                :key="`${point.day}-${i}`"
+                class="price-history__row"
+              >
+                <span class="price-history__day mono">Day {{ point.day }}</span>
+                <span class="price-history__price mono">${{ point.price }}</span>
+                <span
+                  class="price-history__delta mono"
+                  :class="`price-history__delta--${point.deltaClass}`"
+                >
+                  {{ point.deltaLabel }}
+                </span>
+              </li>
+            </ul>
+          </QMenu>
+        </button>
+      </div>
       <div
         v-if="props.row.pressure.amount > 0.05"
         class="row__pressure"
         :class="`row__pressure--${props.row.pressure.kind}`"
       />
-
-      <QTooltip
-        v-if="hasHistory"
-        class="dust-tip"
-        anchor="top middle"
-        self="bottom middle"
-        :offset="[0, 12]"
-        :delay="220"
-      >
-        <div class="dust-tip__name">Price History</div>
-        <ul class="price-history">
-          <li
-            v-for="(point, i) in historyRows"
-            :key="`${point.day}-${i}`"
-            class="price-history__row"
-          >
-            <span class="price-history__day mono">D{{ point.day }}</span>
-            <span class="price-history__price mono">${{ point.price }}</span>
-            <span
-              class="price-history__delta mono"
-              :class="`price-history__delta--${point.deltaClass}`"
-            >
-              {{ point.deltaLabel }}
-            </span>
-          </li>
-        </ul>
-      </QTooltip>
     </div>
 
     <TradeControls
@@ -128,37 +181,28 @@ const historyRows = computed(() =>
   grid-template-columns: var(--cols);
   column-gap: 0;
   align-items: center;
-  min-height: 60px;
-  background: transparent;
+  min-height: 68px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.022), transparent 56%),
+    linear-gradient(115deg, rgba(255, 255, 255, 0.012), transparent 42%), #0b0c0b;
+  border: 1px solid rgba(214, 204, 184, 0.075);
+  border-radius: 10px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.32),
+    0 4px 10px -10px rgba(0, 0, 0, 0.95);
   transition:
     background 180ms ease,
-    box-shadow 180ms ease;
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
 
 .row:nth-child(even) {
-  background: rgba(255, 255, 255, 0.008);
-}
-
-.row::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.05) 10%,
-    rgba(255, 255, 255, 0.085) 50%,
-    rgba(255, 255, 255, 0.05) 90%,
-    transparent 100%
-  );
-  pointer-events: none;
-}
-
-.row:first-child::after {
-  display: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.028), transparent 56%),
+    linear-gradient(115deg, rgba(255, 255, 255, 0.018), transparent 42%), #0d0e0d;
 }
 
 .row::before {
@@ -176,10 +220,15 @@ const historyRows = computed(() =>
 }
 
 .row:hover {
-  background: rgba(255, 255, 255, 0.022);
+  transform: translateX(2px);
+  background:
+    radial-gradient(ellipse at 16% 50%, rgba(184, 137, 63, 0.09), transparent 46%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 56%), #10110f;
+  border-color: rgba(184, 137, 63, 0.24);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.025),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 10px 20px -16px rgba(0, 0, 0, 0.95);
 }
 
 .row:hover::before {
@@ -193,11 +242,11 @@ const historyRows = computed(() =>
 }
 
 .row__divided {
-  border-left: 1px solid var(--stroke);
+  border-left: 1px solid rgba(214, 204, 184, 0.07);
 }
 
 .row__divided-full {
-  border-left: 1px solid var(--stroke);
+  border-left: 1px solid rgba(214, 204, 184, 0.07);
 }
 
 .row__swatch {
@@ -282,11 +331,18 @@ const historyRows = computed(() =>
 
 .row__price-block {
   position: relative;
+  flex-direction: column;
   justify-content: center;
-  gap: 4px;
-  padding: 0 var(--sp-3) 4px;
+  gap: 5px;
+  padding: 7px var(--sp-3) 10px;
   line-height: 1;
-  cursor: help;
+}
+
+.row__price-main {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 
 .row__price {
@@ -304,9 +360,17 @@ const historyRows = computed(() =>
 }
 
 .row__trend {
-  font-size: 11px;
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
   line-height: 1;
-  align-self: center;
+}
+
+.row__trend svg {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
 }
 
 .row__trend--up {
@@ -319,6 +383,44 @@ const historyRows = computed(() =>
 
 .row__trend--flat {
   color: var(--muted-2);
+}
+
+.row__history-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  color: var(--gold-dim);
+  background: rgba(0, 0, 0, 0.19);
+  border: 1px solid rgba(214, 204, 184, 0.1);
+  border-radius: 5px;
+  cursor: pointer;
+  transition:
+    color var(--t-fast),
+    background var(--t-fast),
+    border-color var(--t-fast);
+}
+
+.row__history-trigger svg {
+  width: 13px;
+  height: 13px;
+  fill: currentColor;
+}
+
+.row__history-trigger:hover:not(:disabled),
+.row__history-trigger:focus-visible {
+  color: var(--gold-soft);
+  background: rgba(184, 137, 63, 0.12);
+  border-color: rgba(184, 137, 63, 0.32);
+  outline: none;
+}
+
+.row__history-trigger:disabled {
+  color: var(--muted-2);
+  cursor: not-allowed;
 }
 
 .row__pressure {
@@ -345,20 +447,97 @@ const historyRows = computed(() =>
   display: flex;
   flex-direction: column;
   gap: 4px;
+  margin: 0;
+  padding: 0;
   min-width: 150px;
+  list-style: none;
+}
+
+:global(.price-history-menu) {
+  --history-surface: #12120f;
+  --history-surface-top: #1a1a17;
+  --history-border: #372c1a;
+  overflow: visible;
+  min-width: 274px;
+  padding: 14px;
+  color: var(--text);
+  background: linear-gradient(180deg, var(--history-surface-top), var(--history-surface) 50%);
+  border: 1px solid var(--history-border);
+  border-radius: 10px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    0 20px 38px -14px rgba(0, 0, 0, 0.96);
+}
+
+:global(.price-history-menu::before) {
+  position: absolute;
+  top: -9px;
+  left: var(--history-pointer-x, 50%);
+  width: 0;
+  height: 0;
+  content: '';
+  border-right: 9px solid transparent;
+  border-bottom: 9px solid var(--history-border);
+  border-left: 9px solid transparent;
+  transform: translateX(-50%);
+}
+
+:global(.price-history-menu::after) {
+  position: absolute;
+  top: -7px;
+  left: var(--history-pointer-x, 50%);
+  width: 0;
+  height: 0;
+  content: '';
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid var(--history-surface-top);
+  border-left: 8px solid transparent;
+  transform: translateX(-50%);
+}
+
+:global(.price-history-menu[data-pointer-side='bottom']::before) {
+  top: auto;
+  bottom: -9px;
+  border-top: 9px solid var(--history-border);
+  border-bottom: 0;
+}
+
+:global(.price-history-menu[data-pointer-side='bottom']::after) {
+  top: auto;
+  bottom: -7px;
+  border-top: 8px solid var(--history-surface);
+  border-bottom: 0;
+}
+
+:global(.price-history-menu__head) {
+  padding: 1px 2px 10px;
+  margin-bottom: 9px;
+  color: var(--gold-soft);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(214, 204, 184, 0.1);
 }
 
 .price-history__row {
   display: grid;
-  grid-template-columns: 32px 1fr auto;
-  gap: 8px;
+  grid-template-columns: 48px 1fr auto;
+  gap: 12px;
   align-items: baseline;
-  font-size: 12.5px;
-  line-height: 1.2;
+  min-height: 25px;
+  padding: 5px 4px;
+  font-size: 14px;
+  line-height: 1.25;
+  border-radius: 5px;
+}
+
+.price-history__row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .price-history__day {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.06em;
   color: var(--muted-2);
@@ -371,10 +550,10 @@ const historyRows = computed(() =>
 }
 
 .price-history__delta {
-  min-width: 42px;
+  min-width: 48px;
   text-align: right;
   font-weight: 600;
-  font-size: 11.5px;
+  font-size: 12px;
 }
 
 .price-history__delta--up {
@@ -399,20 +578,19 @@ const historyRows = computed(() =>
 
 @media (max-width: 1500px) {
   .row {
-    grid-template-columns: 14px minmax(0, 1fr) 48px 80px;
+    grid-template-columns: 14px minmax(0, 1fr) 48px 106px;
     grid-template-areas:
       'swatch name  owned price'
       'buy    buy   buy   buy'
       'sell   sell  sell  sell';
-    row-gap: 8px;
+    row-gap: 9px;
     column-gap: 12px;
-    padding: 14px var(--sp-5);
+    padding: 14px;
     min-height: 0;
   }
 
-  .row::after,
   .row::before {
-    display: none;
+    left: 0;
   }
 
   .row__swatch {
@@ -449,6 +627,18 @@ const historyRows = computed(() =>
     width: 100%;
     transform: none;
     left: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .row {
+    grid-template-columns: 12px minmax(0, 1fr) 34px 94px;
+    column-gap: 8px;
+    padding: 12px 10px;
+  }
+
+  .row__owned {
+    font-size: 13px;
   }
 }
 </style>

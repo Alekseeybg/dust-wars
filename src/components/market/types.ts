@@ -7,4 +7,6 @@ export interface MarketRow {
   trend: PriceTrend;
   held: number;
   pressure: SupplyPressure;
+  /** Catalog position, retained as a stable tie-breaker when sorting. */
+  defaultOrder: number;
 }
