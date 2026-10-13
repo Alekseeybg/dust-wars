@@ -4,11 +4,12 @@ defineProps<{
   subtitle?: string;
   meta?: string;
   metaLabel?: string;
+  variant?: 'sidebar';
 }>();
 </script>
 
 <template>
-  <section class="panel">
+  <section class="panel" :class="{ 'panel--sidebar': variant === 'sidebar' }">
     <header class="panel__head">
       <slot name="header">
         <div class="panel__title-block">
@@ -124,5 +125,18 @@ defineProps<{
 
 .panel__body {
   padding: 18px;
+}
+
+.panel--sidebar {
+  background: #0b0b0d;
+  border-color: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+.panel--sidebar .panel__head {
+  padding: 0;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+.panel--sidebar .panel__body {
+  padding: 16px;
 }
 </style>

@@ -15,6 +15,7 @@ import { money } from 'utils/format';
 import { saveGame, loadGame, clearSave } from 'src/services/gameStorage';
 import { createGame } from 'domain/game';
 import { prepareTrade } from 'domain/trading';
+import { prepareDebtPayment } from 'domain/debt';
 import { recordPricePoints } from 'domain/history';
 import { logSegment, epochMovementSegments } from 'domain/log';
 
@@ -38,6 +39,8 @@ export const useGameStore = defineStore('game', {
     cargoUsed: (s) => totalHeld(s.cargoLots),
 
     freeCapacity: (s) => s.capacity - totalHeld(s.cargoLots),
+
+    maxDebtPayment: (s) => Math.max(0, Math.floor(Math.min(s.cash, s.debt))),
 
     cargoGroups: (s) => groupCargo(s.cargoLots),
 
@@ -85,6 +88,20 @@ export const useGameStore = defineStore('game', {
       this.refreshMarket();
       this.persist();
       return { ok: true };
+    },
+
+    payDebt(amount?: number) {
+      const plan = prepareDebtPayment(this.$state, amount ?? this.maxDebtPayment);
+      if (!plan.ok) return plan;
+      this.$patch(plan.update);
+      this.addLog('good', [
+        logSegment('Paid '),
+        logSegment(money(plan.paid), { bold: true, color: 'gold-soft' }),
+        logSegment(plan.update.debt === 0 ? ' — debt cleared.' : ' toward debt. Remaining '),
+        ...(plan.update.debt > 0 ? [logSegment(money(plan.update.debt), { bold: true })] : []),
+      ]);
+      this.persist();
+      return { ok: true as const, paid: plan.paid };
     },
 
     // ------------------------------------------------------------ time --

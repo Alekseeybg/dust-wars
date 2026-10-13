@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
-import { Notify } from 'quasar';
 import { useGameStore } from 'stores/game';
 import type { GamePhase } from 'types';
 import Panel from './Panel.vue';
+import SectionHeading from './SectionHeading.vue';
 
 const game = useGameStore();
 const { health, phase } = storeToRefs(game);
@@ -29,87 +29,87 @@ const phaseLabels: Record<GamePhase, string> = {
   kingpin: 'Kingpin',
   endgame: 'Endgame',
 };
-
-function openProfile() {
-  Notify.create({
-    type: 'info',
-    message: 'Profile screen coming soon.',
-  });
-}
 </script>
 
 <template>
-  <Panel title="Profile">
-    <div class="rows">
-      <div class="row">
-        <span class="row__label">Health</span>
-        <span class="row__value mono">{{ health.current }} / {{ health.max }}</span>
+  <Panel class="profile-box" title="Profile" variant="sidebar">
+    <template #header><SectionHeading title="Profile" subtitle="Player overview" /></template>
+    <dl class="profile-stats">
+      <div class="profile-stats__health">
+        <dt>Health</dt>
+        <dd class="mono">
+          {{ health.current }}<span> / {{ health.max }}</span>
+        </dd>
       </div>
-      <div class="row">
-        <span class="row__label">Status</span>
-        <span class="row__value" :class="healthStatus.className">{{ healthStatus.label }}</span>
+      <div>
+        <dt>Status</dt>
+        <dd :class="healthStatus.className">{{ healthStatus.label }}</dd>
       </div>
-      <div class="row">
-        <span class="row__label">Phase</span>
-        <span class="row__value">{{ phaseLabels[phase] }}</span>
+      <div>
+        <dt>Phase</dt>
+        <dd>{{ phaseLabels[phase] }}</dd>
       </div>
-      <div class="row">
-        <span class="row__label">Weapon</span>
-        <span class="row__value row__value--muted">Unarmed</span>
+      <div>
+        <dt>Weapon</dt>
+        <dd class="profile-stats__muted">Unarmed</dd>
       </div>
-    </div>
-
-    <button class="btn btn--block profile-btn" type="button" @click="openProfile">
-      Open Profile
+    </dl>
+    <button class="section-action section-action--block" type="button" disabled>
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M5 7V5a3 3 0 0 1 6 0v2M4 7h8v6H4zM8 9v2" />
+      </svg>
+      Full profile · Coming soon
     </button>
   </Panel>
 </template>
 
 <style lang="scss" scoped>
-.rows {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 14px;
+.profile-stats {
+  margin: 0 0 14px;
 }
-
-.row {
+.profile-stats > div {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  font-size: var(--fs-sm);
+  gap: 12px;
+  padding: 9px 0;
 }
-
-.row__label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted-2);
+.profile-stats dt {
+  color: #a6a6ad;
+  font-size: 13px;
 }
-
-.row__value {
-  color: var(--text);
+.profile-stats dd {
+  margin: 0;
+  color: #e5e1d9;
+  font-size: 15px;
   font-weight: 500;
+  text-align: right;
 }
-
-.row__value--muted {
-  color: var(--muted);
+.profile-stats .profile-stats__health {
+  padding: 2px 0 14px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
-
-.status--ok {
-  color: var(--forest-soft);
+.profile-stats__health dd {
+  color: #efb34f;
+  font-size: 20px;
+  font-weight: 600;
 }
-
-.status--warn {
-  color: var(--gold-soft);
+.profile-stats__health dd span {
+  color: #a6a6ad;
+  font-size: 14px;
+  font-weight: 400;
 }
-
-.status--bad {
-  color: var(--wine-soft);
+.profile-stats dd.profile-stats__muted {
+  color: #a6a6ad;
 }
-
-.profile-btn {
-  margin-top: 4px;
+.profile-stats dd.status--ok {
+  color: #a7ba80;
+}
+.profile-stats dd.status--warn {
+  color: #efb34f;
+}
+.profile-stats dd.status--bad {
+  color: #e45b54;
 }
 </style>

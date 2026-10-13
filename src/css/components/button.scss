@@ -175,7 +175,7 @@
   stroke-width: 1.35;
 }
 
-.section-action:hover {
+.section-action:hover:not(:disabled) {
   color: #efb34f;
   background: #1b1b1e;
   border-color: rgba(239, 179, 79, 0.3);
@@ -190,6 +190,22 @@
   width: 34px;
   min-height: 34px;
   padding: 0;
+}
+
+.section-action--block {
+  width: 100%;
+  min-height: 42px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+.section-action--accent {
+  color: #efb34f;
+  border-color: rgba(239, 179, 79, 0.3);
+}
+.section-action:disabled {
+  color: #929299;
+  opacity: 0.6;
+  cursor: default;
 }
 
 @media (prefers-reduced-motion: reduce) {

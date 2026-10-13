@@ -22,7 +22,7 @@ function openDialog(drugId: DrugId | null = null) {
 </script>
 
 <template>
-  <Panel class="cargo-hold" title="Cargo Hold">
+  <Panel class="cargo-hold" title="Cargo Hold" variant="sidebar">
     <template #header>
       <SectionHeading title="Cargo Hold" subtitle="Inventory" />
     </template>
@@ -60,18 +60,6 @@ function openDialog(drugId: DrugId | null = null) {
 </template>
 
 <style lang="scss" scoped>
-.cargo-hold {
-  background: #0b0b0d;
-  border-color: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-}
-:deep(.panel__head) {
-  padding: 0;
-  border-bottom-color: rgba(255, 255, 255, 0.1);
-}
-:deep(.panel__body) {
-  padding: 16px;
-}
 .cargo {
   display: flex;
   flex-direction: column;
